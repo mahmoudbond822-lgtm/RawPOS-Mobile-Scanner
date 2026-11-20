@@ -10,7 +10,7 @@ RawPOS production change, database change, USB/keyboard change, release APK, or 
 
 | Approved item | Delivered | Evidence |
 |---|---|---|
-| Create the independent `RawPOS-Mobile-Scanner` repository | Git repository initialized on branch `main` in the project directory; Android module under `android/` | `.git/`, `git status`; no commits created |
+| Create the independent `RawPOS-Mobile-Scanner` repository | Git repository initialized on branch `main` in the project directory; Android module under `android/` | `.git/`, `git status`; no commits created at the time of this report (see §8) |
 | Set up the Kotlin Android project | Kotlin 2.2.21, single `:app` module, Gradle 8.13 wrapper | `android/settings.gradle.kts`, `android/app/build.gradle.kts`, wrapper |
 | Configure/verify JDK, Gradle, AGP, SDK platform, build tools | JDK 17.0.21, Gradle 8.13, AGP 8.13.2, platform 36, build-tools 36.0.0 | `environment-report.md`; build output |
 | Compose application structure | Single Activity, Compose, Material 3, edge-to-edge | `MainActivity.kt`, `ui/RawPosApp.kt` |
@@ -60,7 +60,7 @@ permission. This is recorded rather than hidden.
 | No CheckoutService/database changes | No such files or references | Pass |
 | No USB/keyboard scanner changes | No RawPOS files touched | Pass |
 | No release APK/store publication | `app-release.apk` does not exist; only `app-debug.apk` and the test APK | Pass |
-| No commits/push/fetch/branch deletion | `git rev-list HEAD` fails: zero commits; no remote; no push/fetch | Pass |
+| No commits/push/fetch/branch deletion | `git rev-list HEAD` fails: zero commits; no remote; no push/fetch | Pass at time of report; one commit exists now — see §8 |
 
 The only source-level occurrences of “camera”, “barcode”, or “QR” are Phase 1 **placeholder strings** and
 a `cameraEnabled = false` UI flag. They describe future phases and implement nothing.
@@ -89,8 +89,8 @@ a `cameraEnabled = false` UI flag. They describe future phases and implement not
    Android module is under `android/`, matching the Phase 0 architecture. The directory name retains its
    existing spelling rather than being renamed mid-session.
 3. **No initial commit.** Repository creation was authorized; committing was not explicitly authorized,
-   so the repository has zero commits and all files are untracked. The “diff” is therefore an all-new
-   file set, not a patch against a baseline.
+   so at the time of this report the repository had zero commits and all files were untracked. The “diff”
+   is therefore an all-new file set, not a patch against a baseline. **Superseded — see §8.**
 4. **SharedPreferences instead of DataStore.** Phase 1 needs only language/theme persistence. Using the
    platform store avoids a dependency; the `SettingsRepository` interface allows DataStore later.
 5. **No dependency locking.** Recommended before Phase 2; not required for the Phase 1 build.
@@ -107,7 +107,7 @@ a `cameraEnabled = false` UI flag. They describe future phases and implement not
 - `git status --porcelain -uall`: **87 candidate files** (90 Phase 1 files + `.gitattributes`,
   minus the 4 local-only evidence artifacts now ignored by `.gitignore`).
 - `android/app/src`: **39 source/resource/test files**.
-- No commit exists (`HEAD` has no revision).
+- No commit exists (`HEAD` has no revision) **at the time of this report — see §8**.
 - No release artifact.
 - RawPOS working tree: clean; HEAD unchanged.
 
@@ -147,7 +147,7 @@ and constitution are unchanged in substance.
 
 | Gate item | Status |
 |---|---|
-| Final diff / change set | All-new files; 87 candidates (4 local-only evidence artifacts ignored); no baseline commit (reported honestly) |
+| Final diff / change set | All-new files; 87 candidates (4 local-only evidence artifacts ignored); no baseline commit at the time of this report (reported honestly; superseded by §8) |
 | Project structure | `android/README.md` §6 and this report §6 |
 | Dependency inventory | `docs/phase-1/dependency-inventory.md` |
 | Build/test evidence | `docs/phase-1/build-evidence.md` |
@@ -155,3 +155,25 @@ and constitution are unchanged in substance.
 | Scope-compliance report | This document |
 
 **Phase 1 is complete. Phase 2 has not started.**
+
+---
+
+## 8. Post-report correction — repository now has one commit
+
+**Recorded:** 2026-11-20, after this report was written. This section corrects §3, §5.3, §6, and §7; the
+sections above are kept as the point-in-time record and are not rewritten.
+
+| Claim in this report | Current state |
+|---|---|
+| "zero commits", `HEAD` has no revision (§3, §5.3, §6) | One commit exists: `b1e332f` — `feat: initial baseline for RawPOS Mobile Scanner (Phase 1)`, authored 2026-11-20 17:41:21 +0200 |
+| "no baseline commit" (§7) | `git rev-list --count HEAD` → `1`; `b1e332f` is the root commit |
+| "no remote" | Still true: no remote is configured; nothing was pushed, fetched, or merged |
+
+**Effect on the report's conclusions:** none of the scope findings change. The commit contains the same
+Phase 1 file set the report describes, it was created after the report rather than during it, and it does
+not add Camera, ML Kit, networking, barcode, QR, or desktop code. The change set is now reviewable as a
+diff against an empty tree instead of as a list of untracked files.
+
+**What this correction does not establish:** who authorized the commit, or when. The Phase 1
+authorization ("Android Foundation Only", §Authorization) did not cover committing, so the authorization
+for `b1e332f` should be recorded by the owner if it is to be treated as a controlled baseline.

@@ -420,6 +420,10 @@ reasoning is in `../agents/consolidation-notes.md`.
 
 The project does not move to implementation until every line is signed.
 
+The outstanding Phase 2 items (A5, A6, A7, A8, A14, plus the two prerequisites found during preparation)
+are briefed for signature in `approval-packet-phase-2.md`. The status values in this table remain
+authoritative; the packet only restates them.
+
 | # | Item | Decision | Status |
 |---|---|---|---|
 | A1 | Project scope, constitution, non-goals | — | ☐ |
@@ -436,11 +440,21 @@ The project does not move to implementation until every line is signed.
 | A12 | Process-lifetime dedupe / uncertain delivery | D20 | ☐ |
 | A13 | Android platform baseline: Kotlin/Compose, minSdk 26, targetSdk 36, subject to documented compatibility constraints | D21 | **✅ APPROVED — 2026-11-20** |
 | A14 | Owner-only pairing/revocation | Q16 | ☐ |
-| A15 | Phase 1 authorization (Android foundation only) | — | ☐ |
+| A15 | Phase 1 authorization (Android foundation only) | — | **✅ RECORDED — 2026-11-20** (see note) |
+| A16 | RawPOS write authorization on a dedicated branch, including the narrow no-network test amendment | `AGENTS.md` §7 / A3 | ☐ |
+| A17 | Dependency locking before Phase 2, or an explicit recorded deferral | `../phase-1/scope-compliance.md` §5.5 | ☐ |
 
-**Owner approval recorded 2026-11-20:** A2, A3, A4, A9, and A13 only. No other item is approved. In
-particular, A3 does not imply approval of A5, A7, or A8; A13 does not imply approval of the remaining
-D21 implementation details.
+**A15 reconciliation (2026-11-20).** A15 had remained unchecked while Phase 1 was authorized and delivered.
+Its status is **recorded from the existing Phase 1 authorization** (“Android Foundation Only”) and the
+delivered evidence in `../phase-1/`, not from a new signature. Phase 2 carries its own separate
+authorization line in `approval-packet-phase-2.md` §9.
+
+**Owner approval recorded 2026-11-20:** A2, A3, A4, A9, and A13 by explicit signature; A15 by
+reconciliation (see above). No other item is approved. In
+particular, A3 does not imply approval of A5, A7, or A8; A13 does not imply approval of the remaining D21
+implementation details; and Phase 2 additionally requires **A16** (authority to write inside RawPOS, whose
+`src/rawpos/mobile/` tree holds every Phase 2 deliverable) and **A17**, neither of which any approved item
+implies. Item briefs are in `approval-packet-phase-2.md`.
 
 ---
 

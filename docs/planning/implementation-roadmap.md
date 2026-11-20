@@ -129,8 +129,10 @@ artifacts, no business logic present.
 ## Phase 2 — Desktop receiver and secure pairing
 
 **Duration:** 2 weeks (one desktop engineer).
-**Depends on:** A3 (listener), A4 (QR dependency), A5 (pairing flow), A6 (DPAPI), A7 (port/firewall),
-A8 (server hardening path).
+**Depends on:** A3 (listener) and A4 (QR dependency), **approved 2026-11-20**; A5 (pairing flow),
+A6 (DPAPI), A7 (port/firewall), and A8 (server hardening path), **pending**; plus **A14** (owner-only
+pairing), **A16** (authority to write inside RawPOS), and **A17** (dependency locking or recorded
+deferral), which are prerequisites for this phase and are briefed in `approval-packet-phase-2.md`.
 
 ### Objectives
 
