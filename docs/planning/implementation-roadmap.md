@@ -1,7 +1,7 @@
 # Implementation Roadmap
 
-**Status:** Phase 0 approved; Phase 1 implemented and verified; **Phase 2 authorized 2026-11-20, not
-started**.
+**Status:** Phase 0 approved; Phase 1 implemented and verified; **Phase 2 authorized 2026-11-20, in
+progress**.
 **Rule:** no phase starts until its dependencies and approvals are satisfied. Each phase ends in a
 demonstrable, reversible state.
 **Related:** `risks-and-decisions.md` (approval checklist), `../quality/qa-strategy.md`
@@ -129,7 +129,8 @@ artifacts, no business logic present.
 
 ## Phase 2 — Desktop receiver and secure pairing
 
-**Status:** **authorized 2026-11-20; not started.** Briefs and scope: `approval-packet-phase-2.md`.
+**Status:** **authorized 2026-11-20; in progress.** Increments 1–2 (protocol, registry, pairing state
+machine) are complete: see `../phase-2/build-evidence.md`. TLS, server, dialog, and wiring remain.
 **Duration:** 2 weeks (one desktop engineer).
 **Depends on:** A3, A4, A5, A6, A7, A8, A14, A16, and A17 — **all approved 2026-11-20** (briefs in
 `approval-packet-phase-2.md`). The phase itself was **authorized 2026-11-20** (same packet, §9).
