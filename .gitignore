@@ -1,0 +1,38 @@
+# Gradle and Android build outputs
+.gradle/
+**/build/
+.kotlin/
+captures/
+
+# Local machine configuration
+android/local.properties
+
+# IDE and OS files
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Signing keys and certificates
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.key
+
+# Signing and secret configuration
+keystore.properties
+signing.properties
+secrets.properties
+.env
+.env.*
+
+# Package artifacts and logs
+*.apk
+*.aab
+*.log
+
+# Phase 1 local-only evidence, preserved on disk but excluded from Git
+/docs/phase-1/evidence/settings-ar-before-bidi-fix.png
+/docs/phase-1/evidence/ui-*.xml

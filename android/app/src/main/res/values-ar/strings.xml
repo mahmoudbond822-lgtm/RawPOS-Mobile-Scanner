@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Arabic copy follows the Phase 0 design specification. Native review is still required
+         for the strings marked in docs/design/mobile-ux-specification.md. -->
+    <string name="app_name">ماسح RawPOS</string>
+
+    <string name="common_back">رجوع</string>
+    <string name="common_settings">الإعدادات</string>
+    <string name="common_diagnostics">التشخيص</string>
+
+    <string name="phase1_badge">المرحلة 1 — الأساس</string>
+    <string name="phase1_notice_title">أساس المرحلة الأولى</string>
+    <string name="phase1_notice_body">لا توجد كاميرا أو شبكة في هذه المرحلة. تمهّد هذه الشاشات لربط نقطة البيع والمسح في المراحل التالية.</string>
+
+    <string name="nav_connection">الاتصال</string>
+    <string name="nav_scanner">الماسح</string>
+    <string name="nav_settings">الإعدادات</string>
+    <string name="nav_diagnostics">التشخيص</string>
+
+    <string name="connection_title">الاتصال بنقطة البيع</string>
+    <string name="connection_subtitle">اربط هذا الهاتف بنقطة بيع RawPOS على شبكة Wi-Fi المتجر.</string>
+    <string name="connection_viewfinder_placeholder">مسح رمز QR للربط — المرحلة 2</string>
+    <string name="connection_action_pair">الربط بنقطة البيع</string>
+    <string name="connection_action_preview">معاينة شاشة الماسح</string>
+    <string name="connection_status_title">حالة الاتصال</string>
+    <string name="connection_status_phase1">غير متصل — الربط غير مفعّل في المرحلة 1</string>
+
+    <string name="scanner_title">الماسح</string>
+    <string name="scanner_status_phase1">أساس فقط — الكاميرا غير مفعّلة</string>
+    <string name="scanner_viewfinder_placeholder">معاينة الكاميرا — المرحلة 3</string>
+    <string name="scanner_target_hint">وجّه الكاميرا إلى الباركود</string>
+    <string name="scanner_last_code_label">آخر باركود</string>
+    <string name="scanner_last_code_empty">لا يوجد مسح بعد</string>
+    <string name="scanner_status_idle">في الانتظار</string>
+    <string name="scanner_torch">المصباح</string>
+    <string name="scanner_pause">إيقاف مؤقت</string>
+    <string name="scanner_zoom">تكبير 1×</string>
+    <string name="scanner_phase1_note">تأتي CameraX وML Kit ومسح الباركود في المرحلة 3. لا يُطلب إذن الكاميرا في هذه المرحلة.</string>
+
+    <string name="settings_appearance">المظهر</string>
+    <string name="settings_language">اللغة</string>
+    <string name="settings_language_hint">يُطبّق فورًا ويعيد فتح الشاشة.</string>
+    <string name="settings_language_system">النظام</string>
+    <string name="settings_language_arabic">العربية</string>
+    <string name="settings_language_english">English</string>
+    <string name="settings_theme">السمة</string>
+    <string name="settings_theme_hint">تتبع النظام افتراضيًا.</string>
+    <string name="settings_theme_system">النظام</string>
+    <string name="settings_theme_light">فاتحة</string>
+    <string name="settings_theme_dark">داكنة</string>
+    <string name="settings_support">الدعم</string>
+    <string name="settings_about">عن التطبيق</string>
+    <string name="settings_version">الإصدار</string>
+    <string name="settings_phase1_note">المرحلة 1: الأساس فقط. لا كاميرا، لا شبكة، لا ربط.</string>
+    <string name="settings_open_diagnostics">فتح التشخيص</string>
+
+    <string name="diagnostics_environment">البيئة</string>
+    <string name="diagnostics_package">اسم الحزمة</string>
+    <string name="diagnostics_version">الإصدار</string>
+    <string name="diagnostics_build_type">نوع البناء</string>
+    <string name="diagnostics_min_sdk">أدنى SDK</string>
+    <string name="diagnostics_target_sdk">SDK المستهدف</string>
+    <string name="diagnostics_phase">المرحلة</string>
+    <string name="diagnostics_no_camera">الكاميرا: غير مضافة (المرحلة 3).</string>
+    <string name="diagnostics_no_network">الشبكة: غير مضافة (المرحلة 2/4).</string>
+    <string name="diagnostics_phase1_note">هذه الشاشة تعرض معلومات البناء فقط. لا تُرسل أي بيانات.</string>
+</resources>
