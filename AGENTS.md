@@ -6,14 +6,21 @@ This file is for any coding agent (OpenCode, Claude Code, Codex, or similar) tha
 ## 0. Current phase — read this first
 
 **Phase 1 (Android foundation) is implemented and verified.** The Android project lives under
-`android/`. There is still no camera, ML Kit, barcode, network, TLS, QR pairing, or desktop receiver.
+`android/`. There is still no camera, ML Kit, or barcode code in the app.
 
-**Phase 2 is not authorized.** Do not add camera, network, pairing, or desktop code without a new
-explicit authorization.
+**Phase 2 (desktop receiver and secure pairing) is authorized as of 2026-11-20 and has not started.**
+Its scope is fixed by `docs/planning/approval-packet-phase-2.md`: `protocol.py`, `pairing.py`,
+`devices.py`, `tls.py`, `server.py`, `controller.py` (skeleton, no checkout), `mobile_scanner_dialog.py`,
+the `app.py`/`app_shell.py` wiring, and the exact `segno` pin — on a dedicated RawPOS branch, per A16.
+
+**Not authorized:** camera, ML Kit, barcode scanning, `POST /v1/scans`, `GET /v1/context`,
+`CheckoutService.resolve_barcode()`, any `CheckoutView` change, and any RawPOS push or merge. Do not
+start Phase 3 or Phase 5 work.
 
 **Do not:**
-- modify the sibling RawPOS repository (`..\RawPOS`);
-- add Phase 2+ functionality to the Phase 1 project;
+- modify the sibling RawPOS repository (`..\RawPOS`) except on the Phase 2 branch authorized by A16;
+  never push, merge, or touch its `main`;
+- add Phase 3+ functionality to the project;
 - commit, push, tag, fetch, or create/delete branches without explicit authorization;
 - claim a test, build, or manual QA passed unless you actually ran it and can quote the evidence;
 - add a dependency that is not required by the authorized phase.

@@ -46,7 +46,7 @@ framing); long-poll (rejected: latency/state).
 
 ### D3 — QR pairing with one-time secret, desktop approval, and a six-digit code
 
-**Status:** PROPOSED (approval step needs sign-off)
+**Status:** **APPROVED — owner, 2026-11-20 (A5)**
 **Decision:** desktop opens a 120 s, one-use window; QR carries endpoint, desktop id, SPKI pin, and a
 256-bit secret; the phone submits the secret; the desktop shows the device name + code; the cashier
 approves; the desktop issues a token.
@@ -80,10 +80,11 @@ SHA-256 verifier; the phone stores the token with Android Keystore AES-GCM and b
 
 ### D6 — Receiver off by default, LAN-only, port 47653
 
-**Status:** PROPOSED
+**Status:** **APPROVED — owner, 2026-11-20 (A3 listener; A7 port and firewall)**
 **Approval note:** A3 (owner, 2026-11-20) approved the inbound listener, disabled by default, and the
-no-network test amendment. Port 47653 and the Windows Firewall configuration remain A7 and are **not**
-approved by A3.
+no-network test amendment. A7 (owner, 2026-11-20) approved port 47653 with the Private-profile,
+LocalSubnet-only firewall rule, on the condition that a bind failure reports the error and the configured
+alternative rather than silently changing the port.
 **Decision:** no listener until a signed-in user enables it; bind to a selected private interface;
 Private-profile/LocalSubnet firewall rule; no wildcard/public/VPN binding.
 **Rationale:** smallest attack surface; preserves the offline guarantee.
@@ -153,7 +154,10 @@ wrong-sale risk); rotate on view remount (rejected: language switch would lose a
 
 ### D12 — No database schema change; registry outside `rawpos.db`
 
-**Status:** PROPOSED
+**Status:** **APPROVED — owner, 2026-11-20 (A6)**
+**Approval note:** DPAPI protection approved with the one-way ACL fallback rule: a fallback chosen at
+first use is recorded and never silently migrated later; a later unprotect failure keeps the receiver off
+and never falls back to plaintext.
 **Decision:** device registry and pairing state live in `%LOCALAPPDATA%\RawPOS\mobile\`, with token
 hashes and timestamps; TLS key protected by DPAPI (or ACL fallback). No migration.
 **Rationale:** keeps transport state out of the business DB; avoids schema/backup/restore coupling.
@@ -200,7 +204,7 @@ worse than a rescan.
 
 ### D16 — One active device per desktop
 
-**Status:** PROPOSED
+**Status:** **APPROVED — owner, 2026-11-20 (A5)**
 **Decision:** one paired phone is active; pairing another requires "Replace current device" and revokes
 the old token.
 **Rationale:** removes ambiguity about which phone is feeding the cart; matches the single-cashier vision.
@@ -245,7 +249,8 @@ requested QR workflow); a cloud QR image (rejected: internet).
 
 ### D19 — HTTP server hardening path
 
-**Status:** PROPOSED (release gate)
+**Status:** **APPROVED — owner, 2026-11-20 (A8)** (release gate retained: fuzz must pass, or `waitress` is
+adopted)
 **Decision:** start with `http.server.ThreadingHTTPServer` and a hardened custom handler; fuzz it in
 Phase 7. If fuzzing fails, adopt `waitress` (pure Python, zero transitive dependencies) as the one
 approved server dependency.
@@ -377,7 +382,7 @@ Each question has a recommended answer. Silence is not approval.
 | Q13 | Is DPAPI-protected key storage acceptable (Windows-specific), or ACL-only? | **DPAPI**, with ACL fallback and a fail-closed path. |
 | Q14 | Is one new QR dependency (`segno`) acceptable? | **Yes**; it is pure Python with no transitive dependencies. |
 | Q15 | Is `waitress` acceptable if `http.server` fails fuzzing? | **Yes**, as a release-gate contingency. |
-| Q16 | Who may pair/revoke: owner only, or any signed-in cashier? | **Owner only**; connecting an already-paired phone can be any cashier. |
+| Q16 | Who may pair/revoke: owner only, or any signed-in cashier? | **Owner only** for pairing and revoke; any signed-in cashier may enable the receiver and connect an already-paired phone. **Decided — A14, 2026-11-20.** |
 | Q17 | Is process-lifetime dedupe acceptable (no exactly-once across a desktop crash)? | **Yes**, with "delivery uncertain" UX. |
 | Q18 | What is the shop LAN topology (guest isolation, multiple APs, static DHCP)? | Needed before Phase 6; client isolation must be documented as unsupported. |
 
@@ -430,31 +435,37 @@ authoritative; the packet only restates them.
 | A2 | Additive `CheckoutService.resolve_barcode()` | D9 | **✅ APPROVED — 2026-11-20** |
 | A3 | Inbound LAN listener + no-network test amendment | D6/R8 | **✅ APPROVED — 2026-11-20** (port/firewall remains A7) |
 | A4 | QR dependency `segno` | D18 | **✅ APPROVED — 2026-11-20** |
-| A5 | Pairing approval step + one active device | D3/D16 | ☐ |
-| A6 | DPAPI key/registry storage | D12 | ☐ |
-| A7 | Port 47653 + Private/LocalSubnet firewall | D6 | ☐ |
-| A8 | HTTP server hardening path | D19 | ☐ |
+| A5 | Pairing approval step + one active device | D3/D16 | **✅ APPROVED — 2026-11-20** (approval tap, 6-digit code, 120 s single-use window, one active device) |
+| A6 | DPAPI key/registry storage | D12 | **✅ APPROVED — 2026-11-20** (DPAPI + hash-only registry; one-way ACL fallback) |
+| A7 | Port 47653 + Private/LocalSubnet firewall | D6 | **✅ APPROVED — 2026-11-20** (no silent port change on bind failure) |
+| A8 | HTTP server hardening path | D19 | **✅ APPROVED — 2026-11-20** (stdlib first; `waitress` pre-approved as the fuzz-gate remedy) |
 | A9 | Mobile admission policy: active Sales + full mode + open shift + no modal + no transition | D17 | **✅ APPROVED — 2026-11-20** |
 | A10 | Exact-only UPC/EAN behavior | D14/R13 | ☐ |
 | A11 | Enabled/disabled barcode formats | D14 | ☐ |
 | A12 | Process-lifetime dedupe / uncertain delivery | D20 | ☐ |
 | A13 | Android platform baseline: Kotlin/Compose, minSdk 26, targetSdk 36, subject to documented compatibility constraints | D21 | **✅ APPROVED — 2026-11-20** |
-| A14 | Owner-only pairing/revocation | Q16 | ☐ |
+| A14 | Owner-only pairing/revocation | Q16 | **✅ APPROVED — 2026-11-20** (owner-only for both pairing and revoke) |
 | A15 | Phase 1 authorization (Android foundation only) | — | **✅ RECORDED — 2026-11-20** (see note) |
-| A16 | RawPOS write authorization on a dedicated branch, including the narrow no-network test amendment | `AGENTS.md` §7 / A3 | ☐ |
-| A17 | Dependency locking before Phase 2, or an explicit recorded deferral | `../phase-1/scope-compliance.md` §5.5 | ☐ |
+| A16 | RawPOS write authorization on a dedicated branch, including the narrow no-network test amendment | `AGENTS.md` §7 / A3 | **✅ APPROVED — 2026-11-20** (dedicated branch only; no push, no merge to `main`) |
+| A17 | Dependency locking before Phase 2, or an explicit recorded deferral | `../phase-1/scope-compliance.md` §5.5 | **✅ APPROVED — 2026-11-20** (Gradle locking + exact `segno` pin) |
 
 **A15 reconciliation (2026-11-20).** A15 had remained unchecked while Phase 1 was authorized and delivered.
 Its status is **recorded from the existing Phase 1 authorization** (“Android Foundation Only”) and the
 delivered evidence in `../phase-1/`, not from a new signature. Phase 2 carries its own separate
 authorization line in `approval-packet-phase-2.md` §9.
 
-**Owner approval recorded 2026-11-20:** A2, A3, A4, A9, and A13 by explicit signature; A15 by
-reconciliation (see above). No other item is approved. In
-particular, A3 does not imply approval of A5, A7, or A8; A13 does not imply approval of the remaining D21
-implementation details; and Phase 2 additionally requires **A16** (authority to write inside RawPOS, whose
-`src/rawpos/mobile/` tree holds every Phase 2 deliverable) and **A17**, neither of which any approved item
-implies. Item briefs are in `approval-packet-phase-2.md`.
+**Owner approval recorded 2026-11-20:** A2, A3, A4, A5, A6, A7, A8, A9, A13, A14, A16, and A17 by
+explicit signature; A15 by reconciliation (see above). Remaining open: **A1** (scope and constitution —
+delivered in Phase 0 but never checked, see below), **A10** and **A11** (Phase 3, pending shop barcode
+data), and **A12** (Phase 4). A3 does not imply approval of A10/A11; A13 does not imply approval of the
+remaining D21 implementation details.
+
+**A1 reconciliation pending.** `implementation-roadmap.md` records Phase 0 as complete and approved, and
+Phase 1 was authorized on that basis, but A1 remains unchecked. It is left open rather than self-approved:
+the owner should confirm the original approval date so the register and the roadmap agree.
+
+**Phase 2 itself is a separate line** (`approval-packet-phase-2.md` §9). Every Phase 2 prerequisite is
+approved, and the phase was **authorized 2026-11-20**.
 
 ---
 

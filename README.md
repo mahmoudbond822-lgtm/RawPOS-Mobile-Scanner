@@ -1,7 +1,8 @@
 # RawPOS Mobile Scanner
 
-**Version:** 1.0 — architecture, specification, and Phase 1 Android foundation
-**Status:** Phase 1 implemented and verified. Phase 2 (desktop receiver/pairing) is **not** authorized.
+**Version:** 1.0 — architecture, specification, Phase 1 Android foundation, Phase 2 approved
+**Status:** Phase 1 implemented and verified. Phase 2 (desktop receiver and pairing) **authorized
+2026-11-20, not started**.
 **Companion to:** RawPOS Desktop (PyQt6 + SQLCipher, Windows)
 
 RawPOS Mobile Scanner turns an Android smartphone into a wireless barcode scanner for RawPOS Desktop.
@@ -86,8 +87,13 @@ docs/
 Evidence: `docs/phase-1/build-evidence.md` and `docs/phase-1/scope-compliance.md`.
 Build instructions: `android/README.md`.
 
-**Not implemented (requires separate authorization):** CameraX, ML Kit, barcode scanning, HTTP/TLS,
-QR pairing, desktop receiver, RawPOS integration, release APK.
+**Phase 2 — Desktop receiver and secure pairing — authorized 2026-11-20, not started.** Scope is fixed
+by `docs/planning/approval-packet-phase-2.md`: TLS listener, QR pairing with desktop approval, device
+registry, and the GUI-thread controller skeleton. No business operation, no checkout integration.
+
+**Not implemented and not authorized:** CameraX, ML Kit, barcode scanning, the scan protocol
+(`POST /v1/scans`), `resolve_barcode()`, RawPOS checkout integration, release APK. The desktop receiver
+and QR pairing belong to the authorized Phase 2 and are still absent.
 
 ---
 

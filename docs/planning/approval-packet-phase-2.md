@@ -22,9 +22,9 @@ binding), **ASSUMED** (unverified, see `risks-and-decisions.md` §7).
 | This repository | `main` at `b1e332f`; tree clean when this packet was prepared. The §10 corrections are uncommitted | `git status --porcelain`, `git log` |
 | RawPOS | clean tree, `HEAD 797167ac…`, unchanged by this project | `git status`, `git rev-parse HEAD` |
 | RawPOS baseline suite | 1,450 passed / 134.97 s | `README.md` §Measured baseline (**VERIFIED**, not re-run for this packet) |
-| Approvals signed | A2, A3, A4, A9, A13 (A15 recorded from the Phase 1 authorization) | `risks-and-decisions.md` §6 |
-| Phase 2 blocking approvals | **A5, A6, A7, A8** | `implementation-roadmap.md` Phase 2 "Depends on" |
-| Prerequisites now on the checklist | **A16** (RawPOS write authorization), **A17** (dependency locking or recorded deferral) | `risks-and-decisions.md` §6, §7 below |
+| Approvals signed | A2, A3, A4, A5, A6, A7, A8, A9, A13, A14, A16, A17 (A15 recorded from the Phase 1 authorization) | `risks-and-decisions.md` §6 |
+| Phase 2 blocking approvals | **none remaining** — all prerequisites signed 2026-11-20 | `implementation-roadmap.md` Phase 2 "Depends on" |
+| Still open | **A1** (reconciliation pending), **A10**/**A11** (Phase 3, need shop data), **A12** (Phase 4) | `risks-and-decisions.md` §6 |
 
 Phase 2 is estimated at **2 person-weeks** and produces **no business behavior**: it authenticates a
 phone and issues a token. It does not touch checkout, pricing, stock, shifts, invoices, or the DB schema.
@@ -314,15 +314,24 @@ Signing a row authorizes **only** that item, for Phase 2, as described above. Si
 
 | # | Item | Decision | Owner signature | Date |
 |---|---|---|---|---|
-| A5 | Pairing approval tap + 6-digit code + 120 s single-use window + one active device | D3 / D16 | | |
-| A6 | DPAPI-protected TLS key and registry; ACL fallback, including the one-way fallback rule in §3 | D12 | | |
-| A7 | Inbound TCP 47653, Private profile, LocalSubnet only, with a port-conflict path | D6 | | |
-| A8 | `http.server` + hardened handler, `waitress` pre-approved as the Phase 7 fallback | D19 | | |
-| A14 | Owner-only pairing and revocation; any signed-in user may enable/connect | Q16 | | |
-| A16 | RawPOS write authorization on a dedicated branch, including the narrow no-network test amendment | AGENTS §7 / A3 | | |
-| A17 | Gradle dependency locking now — or explicit deferral with risk accepted | Phase 1 §5.5 | | |
+| A5 | Pairing approval tap + 6-digit code + 120 s single-use window + one active device | D3 / D16 | Approved as specified | 2026-11-20 |
+| A6 | DPAPI-protected TLS key and registry; ACL fallback, including the one-way fallback rule in §3 | D12 | Approved as specified | 2026-11-20 |
+| A7 | Inbound TCP 47653, Private profile, LocalSubnet only, with a port-conflict path | D6 | Approved as specified | 2026-11-20 |
+| A8 | `http.server` + hardened handler, `waitress` pre-approved as the Phase 7 fallback | D19 | Approved as specified | 2026-11-20 |
+| A14 | Owner-only pairing and revocation; any signed-in user may enable/connect | Q16 | Owner-only for pairing and revoke | 2026-11-20 |
+| A16 | RawPOS write authorization on a dedicated branch, including the narrow no-network test amendment | AGENTS §7 / A3 | Dedicated branch; no push, no merge | 2026-11-20 |
+| A17 | Gradle dependency locking now — or explicit deferral with risk accepted | Phase 1 §5.5 | Lock now; exact `segno` pin | 2026-11-20 |
 
-**Phase 2 authorization itself:** ☐ authorized ☐ not authorized — owner: ______________ date: ______
+**Recorded:** the decisions above were given by the owner in session on 2026-11-20 and are recorded as
+signed approvals in `risks-and-decisions.md` §6. The Phase 2 authorization line below has **not** been
+given, so Phase 2 remains unauthorized.
+
+**Phase 2 authorization itself:** ☑ **AUTHORIZED — owner, 2026-11-20** ☐ not authorized
+
+Scope of this authorization: exactly the deliverables in §1 and the task order in §11, on the dedicated
+RawPOS branch approved in A16. It does not authorize camera, barcode, `POST /v1/scans`,
+`GET /v1/context`, `resolve_barcode()`, any `CheckoutView` change, any RawPOS push or merge, or any
+release artifact.
 
 ---
 

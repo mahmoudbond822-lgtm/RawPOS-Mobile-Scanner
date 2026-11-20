@@ -1,6 +1,7 @@
 # Implementation Roadmap
 
-**Status:** Phase 0 approved; Phase 1 implemented and verified; Phase 2 awaiting authorization.
+**Status:** Phase 0 approved; Phase 1 implemented and verified; **Phase 2 authorized 2026-11-20, not
+started**.
 **Rule:** no phase starts until its dependencies and approvals are satisfied. Each phase ends in a
 demonstrable, reversible state.
 **Related:** `risks-and-decisions.md` (approval checklist), `../quality/qa-strategy.md`
@@ -128,11 +129,10 @@ artifacts, no business logic present.
 
 ## Phase 2 — Desktop receiver and secure pairing
 
+**Status:** **authorized 2026-11-20; not started.** Briefs and scope: `approval-packet-phase-2.md`.
 **Duration:** 2 weeks (one desktop engineer).
-**Depends on:** A3 (listener) and A4 (QR dependency), **approved 2026-11-20**; A5 (pairing flow),
-A6 (DPAPI), A7 (port/firewall), and A8 (server hardening path), **pending**; plus **A14** (owner-only
-pairing), **A16** (authority to write inside RawPOS), and **A17** (dependency locking or recorded
-deferral), which are prerequisites for this phase and are briefed in `approval-packet-phase-2.md`.
+**Depends on:** A3, A4, A5, A6, A7, A8, A14, A16, and A17 — **all approved 2026-11-20** (briefs in
+`approval-packet-phase-2.md`). The phase itself was **authorized 2026-11-20** (same packet, §9).
 
 ### Objectives
 
