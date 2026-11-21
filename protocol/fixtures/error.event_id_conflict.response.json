@@ -1,0 +1,6 @@
+{
+  "error": "event_id_conflict",
+  "message_code": "mobile.error.event_id_conflict",
+  "status": "event_id_conflict",
+  "v": 1
+}

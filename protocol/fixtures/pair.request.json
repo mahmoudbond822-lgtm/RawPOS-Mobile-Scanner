@@ -1,0 +1,10 @@
+{
+  "android_api": 31,
+  "app_version": "1.0.0",
+  "client_nonce": "NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN",
+  "device_id": "5f0c2f7e-6a1e-4a6e-9a2b-2f6f5f2b9c11",
+  "device_name": "Cashier phone",
+  "pairing_id": "PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",
+  "secret": "SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS",
+  "v": 1
+}

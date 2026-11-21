@@ -67,6 +67,13 @@ android {
             isIncludeAndroidResources = false
         }
     }
+
+    sourceSets {
+        getByName("test") {
+            // The shared contract fixtures live outside the module so both sides read one copy.
+            resources.srcDir("../../protocol/fixtures")
+        }
+    }
 }
 
 kotlin {
@@ -96,6 +103,7 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.org.json)
 
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.androidx.junit)
