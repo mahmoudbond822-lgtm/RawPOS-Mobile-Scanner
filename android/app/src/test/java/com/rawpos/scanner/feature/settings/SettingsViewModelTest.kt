@@ -72,18 +72,32 @@ class SettingsViewModelTest {
         assertEquals(ThemeMode.LIGHT, repository.theme.value)
         assertEquals(ThemeMode.LIGHT, viewModel.state.value.theme)
     }
+
+    @Test
+    fun `setScanFeedback writes through and updates state`() = runTest {
+        val repository = FakeSettingsRepository(LanguageMode.SYSTEM, ThemeMode.SYSTEM)
+        val viewModel = SettingsViewModel(repository, appInfo)
+
+        viewModel.setScanFeedback(false)
+
+        assertEquals(false, repository.scanFeedback.value)
+        assertEquals(false, viewModel.state.value.scanFeedback)
+    }
 }
 
 private class FakeSettingsRepository(
     initialLanguage: LanguageMode,
     initialTheme: ThemeMode,
+    initialScanFeedback: Boolean = true,
 ) : SettingsRepository {
 
     private val _language = MutableStateFlow(initialLanguage)
     private val _theme = MutableStateFlow(initialTheme)
+    private val _scanFeedback = MutableStateFlow(initialScanFeedback)
 
     override val language: StateFlow<LanguageMode> = _language.asStateFlow()
     override val theme: StateFlow<ThemeMode> = _theme.asStateFlow()
+    override val scanFeedback: StateFlow<Boolean> = _scanFeedback.asStateFlow()
 
     override fun setLanguage(mode: LanguageMode) {
         _language.value = mode
@@ -91,5 +105,9 @@ private class FakeSettingsRepository(
 
     override fun setTheme(mode: ThemeMode) {
         _theme.value = mode
+    }
+
+    override fun setScanFeedback(enabled: Boolean) {
+        _scanFeedback.value = enabled
     }
 }

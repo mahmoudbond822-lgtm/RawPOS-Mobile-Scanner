@@ -35,6 +35,8 @@
     <string name="scanner_torch_on">Torch on</string>
     <string name="scanner_pause">Pause</string>
     <string name="scanner_resume">Resume</string>
+    <string name="scanner_zoom_in">Zoom 2×</string>
+    <string name="scanner_zoom_out">Zoom 1×</string>
     <string name="scanner_permission_title">Camera permission needed</string>
     <string name="scanner_permission_body">The camera is used only while this screen is open. Nothing leaves the phone.</string>
     <string name="scanner_permission_action">Allow camera</string>
@@ -52,6 +54,8 @@
     <string name="settings_language_english">English</string>
     <string name="settings_theme">Theme</string>
     <string name="settings_theme_hint">Follows the system by default.</string>
+    <string name="settings_feedback">Scanner feedback</string>
+    <string name="settings_feedback_hint">Sound and vibration on a successful scan. Sound is skipped in silent mode.</string>
     <string name="settings_theme_system">System</string>
     <string name="settings_theme_light">Light</string>
     <string name="settings_theme_dark">Dark</string>

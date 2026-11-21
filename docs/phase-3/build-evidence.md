@@ -197,16 +197,51 @@ Recorded so "it works" is not mistaken for "it is finished":
 
 ---
 
+## Increment 3 — feedback, zoom, and the camera smoke test
+
+### What was added
+
+| Item | Behaviour |
+|---|---|
+| Scan feedback | One haptic tick and one short beep per accepted scan |
+| Silent mode | The beep is skipped when the ringer is silent; the haptic still fires |
+| Opt-out | `Settings → Scanner feedback` switch, default on, persisted |
+| Zoom | 1× / 2× toggle driving `cameraControl.setZoomRatio` |
+| Instrumented smoke | `ScannerScreenTest` navigates to the screen and asserts its controls |
+
+The feedback fires from a `scanCount` counter, not from the barcode value, so two consecutive scans of
+the same product each produce feedback. Keying it on the value would have silently skipped the second.
+
+### Gates
+
+| Gate | Result |
+|---|---|
+| `assembleDebug` | BUILD SUCCESSFUL |
+| `testDebugUnitTest` | **45 tests**, 0 failed |
+| `lintDebug` | 0 errors, 18 warnings — all version notices |
+| `connectedDebugAndroidTest` | **pending** — see below |
+
+### A third MIUI behaviour
+
+The instrumented run needs the screen unlocked, and this build blocks both `settings put system` and
+`pm grant`. The screen timeout is 30 s, so the phone re-locks during the one-minute build and the test
+APK install fails with `INSTALL_FAILED_USER_RESTRICTED`.
+
+Workable options, in order of preference:
+
+1. Developer options → **Stay awake** (screen never sleeps while charging) — removes the problem entirely.
+2. Settings → Display → Screen timeout 10 minutes.
+3. Keep the phone unlocked by hand for the duration of the run.
+
+---
+
 ## Open items
 
-1. **Live camera preview on the device** — needs a person to grant the runtime permission once; `pm grant`
-   is blocked on this MIUI build.
-2. **Physical-label decoding** — the generated-image test proves ML Kit; a real label also proves aim,
-   focus, and exposure. The 20 sample labels are synthetic, so the pre-pilot capture still stands as a
-   blocking gate (R13).
-3. **Instrumented camera smoke test** — grant the permission through the system dialog with UiAutomator,
-   then assert the preview binds.
-4. **Arabic review** — 20 new scanner strings are written but not reviewed by a native speaker (Q22).
-5. **APK size** — 36.8 MB debug with the bundled model; measure release after R8 in Phase 8.
-6. **720p / ~10 fps tuning** — the analyzer currently uses CameraX defaults; measurements belong to
-   Phase 6.
+1. **Final instrumented run** — needs the phone kept awake (see the MIUI note above).
+2. **Rejection message on the phone** — logic tested; display unobserved.
+3. **Arabic review** — 22 new scanner settings/strings are written but not reviewed by a native speaker
+   (Q22).
+4. **APK size** — 36.8 MB debug with the bundled model; measure release after R8 in Phase 8.
+5. **720p / ~10 fps tuning** — the analyzer uses CameraX defaults; measurements belong to Phase 6.
+6. **Physical-label decoding** — owner-confirmed on a real label; the pre-pilot capture against real
+   *shop* data remains a blocking gate (R13).

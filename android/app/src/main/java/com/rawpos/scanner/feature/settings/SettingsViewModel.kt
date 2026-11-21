@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.stateIn
 data class SettingsUiState(
     val language: LanguageMode = LanguageMode.SYSTEM,
     val theme: ThemeMode = ThemeMode.SYSTEM,
+    val scanFeedback: Boolean = true,
     val versionName: String = "",
     val buildType: String = "",
 )
@@ -26,6 +27,7 @@ class SettingsViewModel(
     private val initial = SettingsUiState(
         language = repository.language.value,
         theme = repository.theme.value,
+        scanFeedback = repository.scanFeedback.value,
         versionName = appInfo.versionName,
         buildType = appInfo.buildType,
     )
@@ -33,10 +35,12 @@ class SettingsViewModel(
     val state: StateFlow<SettingsUiState> = combine(
         repository.language,
         repository.theme,
-    ) { language, theme ->
+        repository.scanFeedback,
+    ) { language, theme, scanFeedback ->
         SettingsUiState(
             language = language,
             theme = theme,
+            scanFeedback = scanFeedback,
             versionName = appInfo.versionName,
             buildType = appInfo.buildType,
         )
@@ -52,5 +56,9 @@ class SettingsViewModel(
 
     fun setTheme(mode: ThemeMode) {
         repository.setTheme(mode)
+    }
+
+    fun setScanFeedback(enabled: Boolean) {
+        repository.setScanFeedback(enabled)
     }
 }

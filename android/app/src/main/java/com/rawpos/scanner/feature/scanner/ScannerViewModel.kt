@@ -28,6 +28,8 @@ data class ScannerUiState(
     val lastCode: String? = null,
     val rejection: RejectionReason? = null,
     val torchOn: Boolean = false,
+    val zoomOn: Boolean = false,
+    val scanCount: Int = 0,
 )
 
 /**
@@ -76,6 +78,7 @@ class ScannerViewModel(
                         lastCode = decision.value,
                         status = ScannerStatus.SENT,
                         rejection = null,
+                        scanCount = it.scanCount + 1,
                     )
                 }
                 val sink = transport
@@ -100,5 +103,9 @@ class ScannerViewModel(
 
     fun setTorch(enabled: Boolean) {
         _state.update { it.copy(torchOn = enabled) }
+    }
+
+    fun toggleZoom() {
+        _state.update { it.copy(zoomOn = !it.zoomOn) }
     }
 }

@@ -3,7 +3,14 @@ package com.rawpos.scanner.feature.scanner
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.media.AudioManager
+import android.media.ToneGenerator
+import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
+import android.view.HapticFeedbackConstants
+import android.view.View
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
@@ -46,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -73,12 +81,15 @@ import java.util.concurrent.Executors
 @Composable
 fun ScannerScreen(
     state: ScannerUiState,
+    feedbackEnabled: Boolean,
     onFrame: (List<DecodedBarcode>, Long) -> Unit,
     onTogglePause: () -> Unit,
     onTorchChanged: (Boolean) -> Unit,
+    onToggleZoom: () -> Unit,
     onCameraStarted: () -> Unit,
 ) {
     val context = LocalContext.current
+    val view = LocalView.current
     var granted by remember { mutableStateOf(context.hasCameraPermission()) }
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
@@ -87,6 +98,12 @@ fun ScannerScreen(
     LaunchedEffect(Unit) {
         if (!granted) {
             launcher.launch(Manifest.permission.CAMERA)
+        }
+    }
+
+    LaunchedEffect(state.scanCount) {
+        if (state.scanCount > 0) {
+            fireScanFeedback(context = context, view = view, enabled = feedbackEnabled)
         }
     }
 
@@ -130,6 +147,7 @@ fun ScannerScreen(
                 CameraPreview(
                     paused = state.status == ScannerStatus.PAUSED,
                     torchOn = state.torchOn,
+                    zoomOn = state.zoomOn,
                     onFrame = onFrame,
                     onCameraStarted = onCameraStarted,
                 )
@@ -167,7 +185,8 @@ fun ScannerScreen(
                 onClick = { onTorchChanged(!state.torchOn) },
                 modifier = Modifier
                     .weight(1f)
-                    .height(Dimens.ScannerControl),
+                    .height(Dimens.ScannerControl)
+                    .testTag("scanner_torch_button"),
             ) {
                 Text(
                     text = stringResource(
@@ -181,7 +200,8 @@ fun ScannerScreen(
                 onClick = onTogglePause,
                 modifier = Modifier
                     .weight(1f)
-                    .height(Dimens.ScannerControl),
+                    .height(Dimens.ScannerControl)
+                    .testTag("scanner_pause_button"),
             ) {
                 Text(
                     text = stringResource(
@@ -190,6 +210,21 @@ fun ScannerScreen(
                         } else {
                             R.string.scanner_pause
                         },
+                    ),
+                    style = MaterialTheme.typography.labelMedium,
+                    textAlign = TextAlign.Center,
+                )
+            }
+            OutlinedButton(
+                onClick = onToggleZoom,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(Dimens.ScannerControl)
+                    .testTag("scanner_zoom_button"),
+            ) {
+                Text(
+                    text = stringResource(
+                        if (state.zoomOn) R.string.scanner_zoom_out else R.string.scanner_zoom_in,
                     ),
                     style = MaterialTheme.typography.labelMedium,
                     textAlign = TextAlign.Center,
@@ -254,7 +289,10 @@ private fun PermissionPanel(onRequest: () -> Unit) {
             color = Color.White.copy(alpha = 0.8f),
             textAlign = TextAlign.Center,
         )
-        Button(onClick = onRequest) {
+        Button(
+            onClick = onRequest,
+            modifier = Modifier.testTag("scanner_permission_button"),
+        ) {
             Text(stringResource(R.string.scanner_permission_action))
         }
     }
@@ -264,6 +302,7 @@ private fun PermissionPanel(onRequest: () -> Unit) {
 private fun CameraPreview(
     paused: Boolean,
     torchOn: Boolean,
+    zoomOn: Boolean,
     onFrame: (List<DecodedBarcode>, Long) -> Unit,
     onCameraStarted: () -> Unit,
 ) {
@@ -326,6 +365,36 @@ private fun CameraPreview(
     LaunchedEffect(torchOn, camera) {
         camera?.cameraControl?.enableTorch(torchOn)
     }
+
+    LaunchedEffect(zoomOn, camera) {
+        camera?.cameraControl?.setZoomRatio(if (zoomOn) 2f else 1f)
+    }
+}
+
+/**
+ * One beep and one tick per accepted scan.
+ *
+ * Sound is skipped in silent mode; the haptic still fires, because a cashier holding the phone often
+ * cannot hear it. Feedback is opt-out from Settings.
+ */
+private fun fireScanFeedback(context: Context, view: View, enabled: Boolean) {
+    if (!enabled) {
+        return
+    }
+    view.performHapticFeedback(
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            HapticFeedbackConstants.CONFIRM
+        } else {
+            HapticFeedbackConstants.VIRTUAL_KEY
+        },
+    )
+    val audio = context.getSystemService(AudioManager::class.java)
+    if (audio == null || audio.ringerMode == AudioManager.RINGER_MODE_SILENT) {
+        return
+    }
+    val tone = ToneGenerator(AudioManager.STREAM_MUSIC, 60)
+    tone.startTone(ToneGenerator.TONE_PROP_BEEP, 90)
+    Handler(Looper.getMainLooper()).postDelayed({ tone.release() }, 400L)
 }
 
 @StringRes

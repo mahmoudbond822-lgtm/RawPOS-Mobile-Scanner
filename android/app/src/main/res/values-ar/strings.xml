@@ -37,6 +37,8 @@
     <string name="scanner_torch_on">المصباح مفعّل</string>
     <string name="scanner_pause">إيقاف مؤقت</string>
     <string name="scanner_resume">متابعة</string>
+    <string name="scanner_zoom_in">تكبير 2×</string>
+    <string name="scanner_zoom_out">تكبير 1×</string>
     <string name="scanner_permission_title">إذن الكاميرا مطلوب</string>
     <string name="scanner_permission_body">تُستخدم الكاميرا أثناء فتح هذه الشاشة فقط، ولا يخرج أي شيء من الهاتف.</string>
     <string name="scanner_permission_action">السماح بالكاميرا</string>
@@ -54,6 +56,8 @@
     <string name="settings_language_english">English</string>
     <string name="settings_theme">السمة</string>
     <string name="settings_theme_hint">تتبع النظام افتراضيًا.</string>
+    <string name="settings_feedback">تنبيه الماسح</string>
+    <string name="settings_feedback_hint">صوت واهتزاز عند نجاح المسح. يُتجاهل الصوت في الوضع الصامت.</string>
     <string name="settings_theme_system">النظام</string>
     <string name="settings_theme_light">فاتحة</string>
     <string name="settings_theme_dark">داكنة</string>

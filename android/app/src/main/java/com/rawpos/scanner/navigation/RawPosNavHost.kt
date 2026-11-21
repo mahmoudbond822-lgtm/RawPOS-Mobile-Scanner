@@ -106,9 +106,11 @@ fun RawPosNavHost(
                 val state by viewModel.state.collectAsStateWithLifecycle()
                 ScannerScreen(
                     state = state,
+                    feedbackEnabled = settings.scanFeedback,
                     onFrame = viewModel::onFrame,
                     onTogglePause = viewModel::togglePause,
                     onTorchChanged = viewModel::setTorch,
+                    onToggleZoom = viewModel::toggleZoom,
                     onCameraStarted = viewModel::onCameraStarted,
                 )
             }
@@ -123,6 +125,7 @@ fun RawPosNavHost(
                         }
                     },
                     onThemeSelected = settingsViewModel::setTheme,
+                    onScanFeedbackChanged = settingsViewModel::setScanFeedback,
                     onOpenDiagnostics = {
                         navController.navigate(RawPosDestination.DIAGNOSTICS.route) {
                             launchSingleTop = true

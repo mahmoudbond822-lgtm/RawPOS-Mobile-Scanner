@@ -14,8 +14,10 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -32,6 +34,7 @@ fun SettingsScreen(
     state: SettingsUiState,
     onLanguageSelected: (LanguageMode) -> Unit,
     onThemeSelected: (ThemeMode) -> Unit,
+    onScanFeedbackChanged: (Boolean) -> Unit,
     onOpenDiagnostics: () -> Unit,
 ) {
     Column(
@@ -90,6 +93,31 @@ fun SettingsScreen(
                     label = { Text(themeLabel(mode)) },
                 )
             }
+        }
+
+        HorizontalDivider()
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.settings_feedback),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Text(
+                    text = stringResource(R.string.settings_feedback_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Switch(
+                checked = state.scanFeedback,
+                onCheckedChange = onScanFeedbackChanged,
+                modifier = Modifier.testTag("settings_feedback_switch"),
+            )
         }
 
         HorizontalDivider()
