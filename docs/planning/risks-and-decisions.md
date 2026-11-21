@@ -180,7 +180,13 @@ success.
 
 ### D14 — Barcode format set
 
-**Status:** PROPOSED (requires shop input)
+**Status:** **APPROVED PROVISIONALLY — owner, 2026-11-21 (A11).** Approved as a **default set**, not as a
+statement about the shop: no real shop data exists yet (`../quality/barcode-audit-2026-11-21.md`). The
+pre-pilot verification against real labels is mandatory and may change the enabled set through settings
+without an architecture change.
+
+**Decision:** enable EAN-13, EAN-8, UPC-A, and numeric Code 128; disable UPC-E, Code 39, ITF-14, and QR for
+product scanning; QR is enabled only in pairing mode.
 **Decision:** enable EAN-13, EAN-8, UPC-A, and numeric Code 128; disable UPC-E, Code 39, ITF, and QR for
 product scanning; QR is enabled only in pairing mode.
 **Rationale:** RawPOS stores ASCII digits only; alphanumeric/QR payloads cannot match and may trigger
@@ -329,7 +335,7 @@ is derived from invoice state, so it survives the remount.
 | R10 | QR shoulder-surf / pairing race | M / M | TTL, one use, approval, device name + code, visible pending device | Net + UX | 2 |
 | R11 | Lost/stolen phone | M / H | Keystore, no backup, revoke, scan-only scope | Net + Android | 2 |
 | R12 | DoS / parser abuse | M / M | Bounds, rate limits, fuzz gate, supervised thread | Net + QA | 2/7 |
-| R13 | UPC-A/EAN-13 representation mismatch | H / M | Exact-only; pre-pilot capture; shop normalization decision | Barcode + Owner | 0/3 |
+| R13 | UPC-A/EAN-13 representation mismatch | H / M | Exact-only; **pre-pilot label capture is a blocking pilot gate** (audit tooling ready, no real data yet); shop normalization decision still open | Barcode + Owner | 0/3 |
 | R14 | Barcode format false negatives | M / M | Configurable formats; per-shop verification; raw value display | Barcode | 3 |
 | R15 | Android fragmentation/camera variance | H / M | 720p/10 fps; device matrix; fallback instructions | Android + QA | 3/6 |
 | R16 | Battery/thermal drain | M / M | Camera off when backgrounded; 10 fps; measure; no wake locks | Android | 3/6 |
@@ -444,8 +450,8 @@ authoritative; the packet only restates them.
 | A7 | Port 47653 + Private/LocalSubnet firewall | D6 | **✅ APPROVED — 2026-11-20** (no silent port change on bind failure) |
 | A8 | HTTP server hardening path | D19 | **✅ APPROVED — 2026-11-20** (stdlib first; `waitress` pre-approved as the fuzz-gate remedy) |
 | A9 | Mobile admission policy: active Sales + full mode + open shift + no modal + no transition | D17 | **✅ APPROVED — 2026-11-20** |
-| A10 | Exact-only UPC/EAN behavior | D14/R13 | ☐ |
-| A11 | Enabled/disabled barcode formats | D14 | ☐ |
+| A10 | Exact-only UPC/EAN behavior | D14/R13 | ☐ — deferred to Phase 5; needs real 12/13-digit data, which does not exist yet |
+| A11 | Enabled/disabled barcode formats | D14 | **✅ APPROVED PROVISIONALLY — 2026-11-21** (D14 defaults; pre-pilot verification against real labels is mandatory) |
 | A12 | Process-lifetime dedupe / uncertain delivery | D20 | ☐ |
 | A13 | Android platform baseline: Kotlin/Compose, minSdk 26, targetSdk 36, subject to documented compatibility constraints | D21 | **✅ APPROVED — 2026-11-20** |
 | A14 | Owner-only pairing/revocation | Q16 | **✅ APPROVED — 2026-11-20** (owner-only for both pairing and revoke) |

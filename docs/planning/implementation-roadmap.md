@@ -193,7 +193,9 @@ catalogs updated; evidence recorded.
 ## Phase 3 — Android camera and barcode scanning
 
 **Duration:** 2 weeks (Android engineer).
-**Depends on:** Phase 1; a real device; format decision (A11).
+**Depends on:** Phase 1 (complete); **A11 — approved provisionally 2026-11-21** (D14 defaults, pre-pilot
+verification mandatory); a physical Android device (available). A10 is **not** a Phase 3 dependency: it
+governs the desktop lookup and belongs to Phase 5.
 
 ### Objectives
 
