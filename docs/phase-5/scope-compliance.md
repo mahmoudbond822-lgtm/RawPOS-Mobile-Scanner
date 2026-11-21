@@ -80,10 +80,10 @@ Phase 4 ended at 1661; Phase 5 added 27 tests (8 service, 6 view, 12 bridge, 1 e
 
 | Criterion | Status |
 |---|---|
-| A mobile scan adds exactly one line and renders the existing status | **met at the service and view level**; not yet observed on hardware |
+| A mobile scan adds exactly one line and renders the existing status | **met on hardware** — 2026-11-21, owner-observed; the server log shows `added`, `merged`, `merged`, `not_found`, `not_found` with matching 200s |
 | USB and keyboard-only checkout unchanged | **met** — suite unmodified |
 | No business call from a non-GUI thread | **met** — asserted |
-| A stale context never mutates the new invoice | **met** — Phase 4 service rules, unchanged |
+| A stale context never mutates the new invoice | **partly** — see §11: the token is always `null`, so the check never fires |
 | Read-only / no-shift scans refused with clear statuses | **met** — parametrised |
 | Full RawPOS suite green | **met** — 1688 passed |
 
@@ -120,7 +120,44 @@ Phase 4 ended at 1661; Phase 5 added 27 tests (8 service, 6 view, 12 bridge, 1 e
 
 ---
 
-## 10. Closure statement
+## 11. Post-verification finding — the context token is always `null`
+
+Recorded after the first successful hardware run, from the server log and the phone's delivery lines:
+every response carried `context=null`, and `/v1/context` reported `checkout_active: false` while a draft
+was open.
+
+Cause: the shell derives the token from `InvoiceView.invoice_id`, and a **draft has no `invoice_id`** —
+it is assigned at finalize. The provider therefore returns `None`, the context gate sees "no active
+invoice", and it accepts every scan. The D11/A21 protection is implemented but **inert for drafts**,
+which is precisely the window it was meant to cover (a scan delayed across a finalize).
+
+This is an integration defect, not a protocol defect: the token scheme, the gate, and the tests are
+correct. The derivation input is wrong.
+
+**Recommended fix (Phase 6):** derive the token from a *draft identity* that changes when a draft is
+started, held, resumed, or finalized — a draft sequence or a per-draft UUID — rather than from
+`invoice_id`. That needs one read-model field, and it is the kind of change that deserves a decision
+rather than a guess.
+
+**Interim position:** scanning works and cannot add the wrong product (exact lookup), but it also cannot
+detect a scan that crosses an invoice boundary. That gap must be closed before any shop pilot.
+
+---
+
+## 12. Defects found only in hardware use
+
+Recorded because they are the argument for Phase 6:
+
+1. **Keep-alive race** — the server closed idle connections while OkHttp reused them, so every scan died
+   with an EOF before reaching a route. Invisible to `http.client`-based tests.
+2. **`"null"` context** — `optString` coerced a JSON `null` into the string `"null"`, failing validation
+   and rejecting every scan with `400`.
+3. **Masked status line** — after pairing, the phone showed the pairing text for ever, so a working scan
+   and a dead one looked identical.
+4. **Context inertia** — §11.
+
+Three of the four were invisible to 1,688 passing tests because they live in the seams between the
+components, not inside one.
 
 Phase 5 delivered the last hop: a mobile scan can reach the checkout view, render exactly like a keyboard
 scan, and be refused cleanly when the till cannot accept it. The business services gained one additive
@@ -129,3 +166,40 @@ method; nothing about money, stock, shifts, or invoices changed.
 The chain is proven in tests and has not yet been run on the shop floor.
 
 **Phase 5 is complete. Phase 6 has not started.**
+
+---
+
+## 11. Post-verification finding — the context token is always `null`
+
+Recorded after the first successful hardware run, from the server log and the phone's delivery lines:
+every response carried `context=null`, and `/v1/context` reported `checkout_active: false` while a
+draft was open.
+
+Cause: the shell derives the token from `InvoiceView.invoice_id`, and a **draft has no `invoice_id`** —
+it is assigned at finalize. The provider therefore returns `None`, the context gate sees "no active
+invoice", and it accepts every scan. The D11/A21 protection is implemented but **inert for drafts**,
+which is the window it was meant to cover.
+
+The token scheme, the gate, and their tests are correct; the derivation input is wrong.
+
+**Recommended fix (Phase 6):** derive the token from a *draft identity* that changes when a draft is
+started, held, resumed, or finalized — a draft sequence or a per-draft UUID — rather than from
+`invoice_id`. That needs one read-model field and a decision, not a guess.
+
+**Interim position:** scanning works and cannot add the wrong product (exact lookup), but it cannot
+detect a scan that crosses an invoice boundary. That must close before any shop pilot.
+
+---
+
+## 12. Defects found only in hardware use
+
+1. **Keep-alive race** — the server closed idle connections while OkHttp reused them, so every scan died
+   with an EOF before reaching a route. Invisible to `http.client`-based tests.
+2. **`"null"` context** — `optString` coerced a JSON `null` into the string `"null"`, failing validation
+   and rejecting every scan with `400`.
+3. **Masked status line** — after pairing, the phone showed the pairing text for ever, so a working scan
+   and a dead one looked identical.
+4. **Context inertia** — §11.
+
+Three of the four lived in the seams between components, which is why 1,688 passing tests did not see
+them.

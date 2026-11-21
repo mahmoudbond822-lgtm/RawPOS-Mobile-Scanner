@@ -18,12 +18,15 @@ This file is for any coding agent (OpenCode, Claude Code, Codex, or similar) tha
 `docs/phase-4/`. A phone pairs over the real QR, scans a label, and is told the truth; the cart is not
 touched.
 
-**Phase 5 (RawPOS integration) is complete** as of 2026-11-21. Evidence and closure:
-`docs/phase-5/`. A mobile scan reaches the checkout view, renders exactly like a keyboard scan, and is
-refused cleanly when the till cannot accept it.
+**Phase 5 (RawPOS integration) is complete and verified on hardware** as of 2026-11-21. Evidence and
+closure: `docs/phase-5/`. A phone scan adds a line, merges a repeat, and reports not-found truthfully —
+confirmed on the POCO X3 against the running till.
 
-**Phase 6 (integration and regression testing) is not authorized.** The hardware end-to-end run has not
-happened yet: install the APK, pair, scan a label, and confirm the line appears on the till.
+**Known gap before any pilot:** the checkout-context token is always `null` because a draft has no
+`invoice_id`, so the cross-invoice check never fires (`docs/phase-5/scope-compliance.md` §11). Fixing it
+needs a draft-identity decision.
+
+**Phase 6 (integration and regression testing) is not authorized.**
 
 **Not authorized:** release packaging, performance tuning, security fuzzing.
 **Do not** change money, pricing, discounts, stock, shifts, invoice finalization, audit semantics, or the
