@@ -129,8 +129,9 @@ artifacts, no business logic present.
 
 ## Phase 2 — Desktop receiver and secure pairing
 
-**Status:** **authorized 2026-11-20; functionally complete 2026-11-21.** All five increments are
-delivered (`../phase-2/build-evidence.md`); the closure report and the merge decision remain.
+**Status:** **authorized 2026-11-20; complete 2026-11-21 (desktop phase).** All five increments are
+delivered and the closure report is `../phase-2/scope-compliance.md`. Merging into `main` still requires
+separate approval, and the phone half does not exist until Phase 3/4.
 **Duration:** 2 weeks (one desktop engineer).
 **Depends on:** A3, A4, A5, A6, A7, A8, A14, A16, and A17 — **all approved 2026-11-20** (briefs in
 `approval-packet-phase-2.md`). The phase itself was **authorized 2026-11-20** (same packet, §9).
