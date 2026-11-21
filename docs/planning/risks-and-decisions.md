@@ -366,6 +366,10 @@ Each question has a recommended answer. Silence is not approval.
 
 ### Barcode data
 
+**Audit attempt 2026-11-21:** no real shop data exists yet. The demo installation was audited instead
+and cannot answer these questions (see `../quality/barcode-audit-2026-11-21.md`). Q7–Q11 below remain
+open, and A10/A11 remain unsigned.
+
 | # | Question | Recommended answer |
 |---|---|---|
 | Q7 | Which formats does the shop actually use: UPC-E, ITF-14, Code 39, alphanumeric Code 128? | Start with EAN-13/8, UPC-A, numeric Code 128; enable others only after verification. |
