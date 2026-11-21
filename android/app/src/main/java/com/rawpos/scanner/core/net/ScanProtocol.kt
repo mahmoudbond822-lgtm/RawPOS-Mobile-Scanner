@@ -56,8 +56,8 @@ object ScanProtocol {
         val json = runCatching { JSONObject(body) }.getOrElse {
             return ParsedResponse(Reaction.RETRY, null, null, null)
         }
-        val instance = json.optString("server_instance_id").takeIf { it.isNotEmpty() }
-        val messageCode = json.optString("message_code").takeIf { it.isNotEmpty() }
+        val instance = json.stringOrNull("server_instance_id")
+        val messageCode = json.stringOrNull("message_code")
 
         if (status == 401 || status == 403) {
             return ParsedResponse(Reaction.UNAUTHORIZED, null, instance, messageCode)
@@ -66,6 +66,10 @@ object ScanProtocol {
             return ParsedResponse(Reaction.NOT_READY, null, instance, messageCode)
         }
         if (status == 409) {
+            return ParsedResponse(Reaction.REFUSED, null, instance, messageCode)
+        }
+        if (status == 400 || status == 413 || status == 415) {
+            // The body is wrong; sending it again cannot help.
             return ParsedResponse(Reaction.REFUSED, null, instance, messageCode)
         }
         if (status == 429 || status == 500 || status == 502 || status == 503 || status == 504) {
@@ -81,9 +85,9 @@ object ScanProtocol {
         }
         val delivery = Delivery.Decided(
             status = scanStatus,
-            context = json.optString("context").takeIf { it.isNotEmpty() },
-            originalStatus = json.optString("original_status").takeIf { it.isNotEmpty() },
-            reasonCode = json.optString("reason_code").takeIf { it.isNotEmpty() },
+            context = json.stringOrNull("context"),
+            originalStatus = json.stringOrNull("original_status"),
+            reasonCode = json.stringOrNull("reason_code"),
             messageCode = messageCode,
         )
         return ParsedResponse(Reaction.DECIDED, delivery, instance, messageCode)
@@ -93,10 +97,17 @@ object ScanProtocol {
         val json = runCatching { JSONObject(body) }.getOrNull() ?: return null
         return ContextSnapshot(
             checkoutActive = json.optBoolean("checkout_active", false),
-            context = json.optString("context").takeIf { it.isNotEmpty() },
-            serverInstanceId = json.optString("server_instance_id").takeIf { it.isNotEmpty() },
+            context = json.stringOrNull("context"),
+            serverInstanceId = json.stringOrNull("server_instance_id"),
         )
     }
+
+    /**
+     * A JSON `null` must stay null. `optString` coerces it to the literal string `"null"`, which then
+     * fails the desktop's 16-character context rule and turns every scan into a 400.
+     */
+    private fun JSONObject.stringOrNull(name: String): String? =
+        if (isNull(name)) null else optString(name).takeIf { it.isNotEmpty() }
 
     /** RFC3339 UTC with milliseconds, as the desktop validates. */
     fun isoMillis(epochMillis: Long): String {

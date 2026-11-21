@@ -1,6 +1,5 @@
 package com.rawpos.scanner.feature.scanner
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rawpos.scanner.core.barcode.BarcodeFormat
@@ -12,6 +11,7 @@ import com.rawpos.scanner.core.barcode.ScanGate
 import com.rawpos.scanner.core.barcode.ValidationResult
 import com.rawpos.scanner.core.net.CredentialStore
 import com.rawpos.scanner.core.net.Delivery
+import com.rawpos.scanner.core.net.ScanLog
 import com.rawpos.scanner.core.net.Pairer
 import com.rawpos.scanner.core.net.PairingError
 import com.rawpos.scanner.core.net.PairingResult
@@ -84,11 +84,6 @@ class ScannerViewModel(
     private val credentialStore: CredentialStore? = null,
     private val gate: ScanGate = ScanGate(),
 ) : ViewModel() {
-
-    private companion object {
-        /** Diagnostics only: outcome and error class, never a barcode. */
-        const val TAG = "RawPosScan"
-    }
 
     private val _state = MutableStateFlow(
         ScannerUiState(
@@ -200,7 +195,7 @@ class ScannerViewModel(
         }
         val sender = transportProvider()
         if (sender == null) {
-            Log.i(TAG, "scan not sent: no desktop transport")
+            ScanLog.info("scan not sent: no desktop transport")
             return
         }
         _state.update {
@@ -208,9 +203,9 @@ class ScannerViewModel(
         }
         viewModelScope.launch {
             val delivery = runCatching { sender.submit(value, format.wireName()) }
-                .onFailure { Log.w(TAG, "scan submission failed", it) }
+                .onFailure { ScanLog.warn("scan submission failed", it) }
                 .getOrNull()
-            Log.i(TAG, "delivery=$delivery")
+            ScanLog.info("delivery=$delivery")
             when (delivery) {
                 is Delivery.Decided -> _state.update {
                     it.copy(submission = SubmissionStatus.DECIDED, decidedStatus = delivery.status)

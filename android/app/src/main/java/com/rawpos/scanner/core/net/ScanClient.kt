@@ -44,7 +44,7 @@ class ScanClient(
                 )
             } catch (error: Exception) {
                 // Diagnostics only: the exception class, never the payload or the barcode.
-                android.util.Log.w("RawPosScan", "attempt failed: ${error.javaClass.simpleName}", error)
+                ScanLog.warn("attempt failed: ${error.javaClass.simpleName}", error)
                 null
             }
 
@@ -110,7 +110,7 @@ class ScanClient(
         )
         if (response.status == 200) ScanProtocol.parseContext(response.body) else null
     } catch (error: Exception) {
-        android.util.Log.w("RawPosScan", "context fetch failed: ${error.javaClass.simpleName}", error)
+        ScanLog.warn("context fetch failed: ${error.javaClass.simpleName}", error)
         null
     }
 

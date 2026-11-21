@@ -150,6 +150,29 @@ class ScanProtocolTest {
     }
 
     @Test
+    fun aJsonNullContextStaysNullInsteadOfBecomingTheStringNull() {
+        // org.json's optString coerces JSON null to "null", which the desktop rejects as a context.
+        val snapshot = ScanProtocol.parseContext(
+            """{"v":1,"checkout_active":false,"context":null,"server_instance_id":"i1"}""",
+        )
+
+        assertNull(snapshot?.context)
+        assertEquals(false, snapshot?.checkoutActive)
+    }
+
+    @Test
+    fun aJsonNullContextInAResponseStaysNull() {
+        val delivery = (
+            ScanProtocol.parse(
+                200,
+                """{"v":1,"status":"added","context":null,"server_instance_id":"i1"}""",
+            ).delivery as Delivery.Decided
+            )
+
+        assertNull(delivery.context)
+    }
+
+    @Test
     fun malformedBodyAsksForARetryRatherThanCrashing() {
         val parsed = ScanProtocol.parse(200, "not json")
 
