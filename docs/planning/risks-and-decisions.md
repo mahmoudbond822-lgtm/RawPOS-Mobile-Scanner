@@ -446,7 +446,7 @@ authoritative; the packet only restates them.
 | A13 | Android platform baseline: Kotlin/Compose, minSdk 26, targetSdk 36, subject to documented compatibility constraints | D21 | **✅ APPROVED — 2026-11-20** |
 | A14 | Owner-only pairing/revocation | Q16 | **✅ APPROVED — 2026-11-20** (owner-only for both pairing and revoke) |
 | A15 | Phase 1 authorization (Android foundation only) | — | **✅ RECORDED — 2026-11-20** (see note) |
-| A16 | RawPOS write authorization on a dedicated branch, including the narrow no-network test amendment | `AGENTS.md` §7 / A3 | **✅ APPROVED — 2026-11-20** (dedicated branch; no merge to `main`; **branch push authorized 2026-11-21**, merge still requires separate approval) |
+| A16 | RawPOS write authorization on a dedicated branch, including the narrow no-network test amendment | `AGENTS.md` §7 / A3 | **✅ APPROVED — 2026-11-20** (dedicated branch; branch push authorized 2026-11-21; **merge to `main` authorized and performed 2026-11-21**, merge commit `7efa178`) |
 | A17 | Dependency locking before Phase 2, or an explicit recorded deferral | `../phase-1/scope-compliance.md` §5.5 | **✅ APPROVED — 2026-11-20** (Gradle locking + exact `segno` pin) |
 
 **A15 reconciliation (2026-11-20).** A15 had remained unchecked while Phase 1 was authorized and delivered.

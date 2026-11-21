@@ -5,7 +5,7 @@ A5, A6, A7, A8, A14, A16, A17, and the phase authorization line in
 `../planning/approval-packet-phase-2.md` §9.
 **Branch:** `feature/mobile-receiver` in RawPOS, from `797167acbcb14d96b476891a573a7e31638acf12`.
 **Result:** compliant on scope. No checkout integration, no scan route, no schema change, no business
-rule change. Merging to `main` remains unauthorized and is **not** part of this report.
+rule change. Merged to `main` on 2026-11-21 — see §10.
 
 ---
 
@@ -123,7 +123,8 @@ Stated plainly so the phase is not credited with more than it earned:
 1. Android SAS vector and pin verification (Phase 3/4).
 2. `device_already_paired` typed code (Phase 4 contract fixtures).
 3. Arabic review of the 30 new keys by a native speaker (Q22).
-4. Merge of `feature/mobile-receiver` into RawPOS `main` — requires separate approval (A16).
+4. ~~Merge of `feature/mobile-receiver` into RawPOS `main`~~ — authorized, performed 2026-11-21
+   (merge commit `7efa178`). See §10.
 5. `waitress` fuzz-gate decision (Phase 7).
 6. Temporary key file during `load_cert_chain` — inherent to Python's TLS API.
 7. Per-window pairing rate limit (Phase 7).
@@ -154,3 +155,25 @@ The desktop half of the product is now real and tested. The phone half does not 
 acceptance criterion "Android pairs with RawPOS via QR" remains **unmet** until Phase 3/4.
 
 **Phase 2 is complete as a desktop phase. Phase 3 has not started, and A10/A11 remain unsigned.**
+
+---
+
+## 10. Post-report note — the merge
+
+**Recorded 2026-11-21, after this report was written.** The owner authorized the merge that A16 had
+reserved, and it was performed with `--no-ff` to keep the branch visible in history:
+
+```
+7efa178 Merge branch 'feature/mobile-receiver' into main
+797167a previous main
+```
+
+| Check | Result |
+|---|---|
+| Merge kind | `--no-ff`, matching the repository's existing merge-commit convention |
+| Parent state | `main` was `797167a`, 0 commits behind, clean tree — no rebase, no force |
+| Gates re-run on `main` after the merge | ruff clean, mypy 157 files, no-float PASS, **1604 passed in 105.75s** |
+| Push | `797167a..7efa178 main -> main`, private remote |
+
+Nothing in this report's findings changes: the merge moved the reviewed commits onto `main` without
+altering them, and the gate run after the merge reproduced the pre-merge result exactly.
