@@ -98,7 +98,7 @@ Private-profile/LocalSubnet firewall rule; no wildcard/public/VPN binding.
 
 ### D7 — Queued Qt bridge; no business call from the receiver thread
 
-**Status:** PROPOSED
+**Status:** **APPROVED — owner, 2026-11-21 (A25)**
 **Decision:** the receiver parses/authenticates/dedupes; a controller on the GUI thread resolves the live
 `CheckoutView` and calls an additive `submit_scan()`; the receiver waits on a bounded future.
 **Rationale:** `CheckoutService` and Qt widgets are not thread-safe and share one SQLCipher connection.
@@ -109,7 +109,7 @@ UI timer queue (rejected: latency, second mechanism).
 
 ### D8 — Additive `CheckoutView.submit_scan()` with a shared result renderer
 
-**Status:** PROPOSED
+**Status:** **APPROVED — owner, 2026-11-21 (A26)**
 **Decision:** extract the status/beep/refresh block into `_render_scan_result()`; `scan()` keeps its
 behavior; `submit_scan()` reuses the renderer without touching `scan_edit` or focus.
 **Rationale:** maximum fidelity to USB behavior, minimum blast radius, preserves focus.
@@ -313,7 +313,7 @@ approved change.
 
 ### D23 — Language/digit remount preserves the connection and context
 
-**Status:** PROPOSED
+**Status:** **APPROVED — owner, 2026-11-21 (A27)**
 **Decision:** the receiver keeps running; the bridge re-resolves the new `CheckoutView`; the context token
 is derived from invoice state, so it survives the remount.
 **Rationale:** a language switch must not drop pairing or duplicate a scan.
@@ -454,7 +454,7 @@ authoritative; the packet only restates them.
 | A7 | Port 47653 + Private/LocalSubnet firewall | D6 | **✅ APPROVED — 2026-11-20** (no silent port change on bind failure) |
 | A8 | HTTP server hardening path | D19 | **✅ APPROVED — 2026-11-20** (stdlib first; `waitress` pre-approved as the fuzz-gate remedy) |
 | A9 | Mobile admission policy: active Sales + full mode + open shift + no modal + no transition | D17 | **✅ APPROVED — 2026-11-20** |
-| A10 | Exact-only UPC/EAN behavior | D14/R13 | ☐ — deferred to Phase 5; needs real 12/13-digit data, which does not exist yet |
+| A10 | Exact-only UPC/EAN behavior | D14/R13 | **✅ APPROVED — 2026-11-21** (exact-only; no normalisation until a pilot audit) |
 | A11 | Enabled/disabled barcode formats | D14 | **✅ APPROVED PROVISIONALLY — 2026-11-21** (D14 defaults; pre-pilot verification against real labels is mandatory) |
 | A12 | Process-lifetime dedupe / uncertain delivery | D10/D15/D20 | **✅ APPROVED — 2026-11-21** (in-memory dedupe, no auto-replay, no offline queue) |
 | A13 | Android platform baseline: Kotlin/Compose, minSdk 26, targetSdk 36, subject to documented compatibility constraints | D21 | **✅ APPROVED — 2026-11-20** |
@@ -469,6 +469,10 @@ authoritative; the packet only restates them.
 | A22 | Truthful status ladder | D13 | **✅ APPROVED — 2026-11-21** |
 | A23 | `INTERNET` permission + pinned OkHttp | D21 residue | **✅ APPROVED — 2026-11-21** |
 | A24 | Phase 4 authorization | — | **✅ APPROVED — 2026-11-21** |
+| A25 | Queued GUI-thread bridge with a bounded deadline | D7 | **✅ APPROVED — 2026-11-21** |
+| A26 | Additive `CheckoutView.submit_scan()` + shared renderer | D8 | **✅ APPROVED — 2026-11-21** |
+| A27 | Remount keeps connection and context | D23 | **✅ APPROVED — 2026-11-21** |
+| A28 | Phase 5 authorization | — | **✅ APPROVED — 2026-11-21** |
 
 **A15 reconciliation (2026-11-20).** A15 had remained unchecked while Phase 1 was authorized and delivered.
 Its status is **recorded from the existing Phase 1 authorization** (“Android Foundation Only”) and the
@@ -488,9 +492,9 @@ the owner should confirm the original approval date so the register and the road
 **Phase 2 itself is a separate line** (`approval-packet-phase-2.md` §9). Every Phase 2 prerequisite is
 approved, and the phase was **authorized 2026-11-20** and merged 2026-11-21.
 
-**Remaining open items:** **A1** (reconciliation — needs the owner's Phase 0 approval date) and **A10**
-(exact-only UPC/EAN — Phase 5, needs real 12/13-digit data). Everything Phase 4 implements was approved
-2026-11-21: A12 with D10 and D15, then A19–A24.
+**Remaining open items:** **A1** only (reconciliation — needs the owner's Phase 0 approval date). Every
+other approval is signed: Phase 2 (A5–A8, A14, A16, A17), Phase 3 (A18), Phase 4 (A12, A19–A24), and
+Phase 5 (A10, A25–A28).
 
 ---
 

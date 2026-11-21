@@ -101,11 +101,11 @@ semantics, or schema. No synthetic key events. USB and keyboard behaviour unchan
 
 | # | Item | Decision | Owner | Date |
 |---|---|---|---|---|
-| A25 | Queued GUI-thread bridge, bounded deadline | D7 | | |
-| A26 | Additive `submit_scan()` + shared renderer | D8 | | |
-| A27 | Remount keeps connection and context | D23 | | |
-| A10 | Exact-only UPC/EAN, no normalisation | D14/R13 | | |
-| A28 | Phase 5 authorization | — | | |
+| A25 | Queued GUI-thread bridge, bounded deadline | D7 | Approved as specified | 2026-11-21 |
+| A26 | Additive `submit_scan()` + shared renderer | D8 | Approved as specified | 2026-11-21 |
+| A27 | Remount keeps connection and context | D23 | Approved as specified | 2026-11-21 |
+| A10 | Exact-only UPC/EAN, no normalisation | D14/R13 | Exact-only approved | 2026-11-21 |
+| A28 | Phase 5 authorization | — | **Authorized** | 2026-11-21 |
 
 **Verification plan**
 

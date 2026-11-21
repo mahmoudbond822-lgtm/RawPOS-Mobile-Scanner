@@ -18,15 +18,19 @@ This file is for any coding agent (OpenCode, Claude Code, Codex, or similar) tha
 `docs/phase-4/`. A phone pairs over the real QR, scans a label, and is told the truth; the cart is not
 touched.
 
-**Phase 5 (RawPOS integration) is not authorized.** It needs A10 (exact-only UPC/EAN) and its own
-authorization.
+**Phase 5 (RawPOS integration) is authorized as of 2026-11-21 (A28) and has not started.** Scope is
+fixed by `docs/planning/approval-packet-phase-5.md`: `resolve_barcode()` (exact-only), the additive
+`CheckoutView.submit_scan()` with a shared renderer, the queued GUI-thread controller, the admission
+policy, and the checkout status chip.
 
-**Not authorized:** `CheckoutService.resolve_barcode()`, any `CheckoutView` change, admission rules, and
-any dispatch into the cart — all Phase 5.
+**Not authorized:** anything beyond Phase 5 — release packaging, performance tuning, security fuzzing.
+**Do not** change money, pricing, discounts, stock, shifts, invoice finalization, audit semantics, or the
+schema; the keyboard-wedge tests must pass unmodified.
 
 **Do not:**
-- modify the sibling RawPOS repository (`..\RawPOS`);
-- add Phase 4+ functionality to the project;
+- modify the sibling RawPOS repository (`..\RawPOS`) except for the changes Phase 5 authorizes:
+  `resolve_barcode()`, `submit_scan()`, the renderer extraction, and the controller wiring;
+- add Phase 6+ functionality to the project;
 - commit, push, tag, fetch, or create/delete branches without explicit authorization;
 - claim a test, build, or manual QA passed unless you actually ran it and can quote the evidence;
 - add a dependency that is not required by the authorized phase.
