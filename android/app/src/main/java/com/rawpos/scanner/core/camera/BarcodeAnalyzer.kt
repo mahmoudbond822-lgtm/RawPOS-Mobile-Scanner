@@ -65,6 +65,12 @@ class BarcodeAnalyzer(
                 )
                 .build()
 
+        /** ML Kit options for pairing mode: QR only, because product formats are disabled for QR. */
+        fun pairingOptions(): BarcodeScannerOptions =
+            BarcodeScannerOptions.Builder()
+                .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
+                .build()
+
         /** Translate an ML Kit format constant into the app's own enum. */
         fun toFormat(value: Int): BarcodeFormat = when (value) {
             Barcode.FORMAT_EAN_13 -> BarcodeFormat.EAN_13

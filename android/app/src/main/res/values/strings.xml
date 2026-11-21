@@ -57,6 +57,12 @@
     <string name="scanner_send_expired">Scan expired — scan again</string>
     <string name="scanner_send_unauthorized">Not paired — re-pair the phone</string>
     <string name="scanner_send_refused">The desktop refused this scan</string>
+    <string name="scanner_pair_start">Pair a desktop</string>
+    <string name="scanner_pair_cancel">Cancel pairing</string>
+    <string name="scanner_pair_waiting">Point the camera at the pairing code on the desktop</string>
+    <string name="scanner_pair_pairing">Waiting for approval on the desktop</string>
+    <string name="scanner_pair_paired">Paired with %1$s</string>
+    <string name="scanner_pair_failed">Pairing failed - try again</string>
 
     <string name="settings_appearance">Appearance</string>
     <string name="settings_language">Language</string>

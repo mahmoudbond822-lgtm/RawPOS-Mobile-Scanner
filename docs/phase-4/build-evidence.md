@@ -241,6 +241,54 @@ assumed.
 
 ---
 
+## Increment 3c — the Android pairing client
+
+### What was added
+
+| File | Purpose |
+|---|---|
+| `core/net/PairingUri.kt` | Parses `rawpos://pair?...`, rejects malformed and expired payloads |
+| `core/net/PairingClient.kt` | POST `/v1/pair`, retries while the cashier decides, maps refusals |
+| `core/DeviceIdentity.kt` | Stable per-installation device id (not a secret) |
+| `ScannerViewModel` | Pairing mode beside product scanning, since both need the camera |
+| `ScannerScreen` | Pair action, pairing states, QR options when pairing |
+| `AppContainer` | Pairing client, transport rebuilt when the token changes |
+
+16 new tests: 6 URI, 7 client, 3 view model.
+
+### Behaviour
+
+- **Pairing mode restricts ML Kit to QR**, because product formats exclude QR by design (D14). The
+  analyzer is rebuilt when the mode changes.
+- **The pin comes from the QR**, so the TLS client is constructed *after* the scan — that is what makes
+  the first connection trustworthy.
+- **The read timeout for pairing is 65 s**, because the desktop deliberately holds the request while a
+  human reads the code and taps Approve.
+- **`202 waiting` retries the identical body**, as the protocol requires; `403/409/410` stop with a typed
+  error; an expired QR is refused before any request is sent.
+- **Credentials land in the Keystore store**, and the transport is rebuilt on the next scan without an
+  app restart.
+
+### Gates
+
+| Gate | Result |
+|---|---|
+| `assembleDebug` | BUILD SUCCESSFUL |
+| `testDebugUnitTest` | **108 tests**, 0 failed (16 new) |
+| `lintDebug` | 0 errors, 20 warnings (version notices only) |
+
+### What is still unproven
+
+The pairing path has **not run against a real desktop**. It is covered by unit tests with a scripted
+transport, but two things only hardware can show:
+
+1. that the phone can decode the desktop's QR through its camera, and
+2. that the pinned TLS handshake succeeds against the desktop's self-signed certificate end to end.
+
+That is the next check, and it needs the RawPOS app running with a pairing window open.
+
+---
+
 ## Open items
 
 1. **Desktop route tests** — consume the same fixtures, including `POST /v1/scans` and `GET /v1/context`

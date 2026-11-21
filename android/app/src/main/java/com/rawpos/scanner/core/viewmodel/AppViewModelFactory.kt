@@ -3,6 +3,8 @@ package com.rawpos.scanner.core.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.rawpos.scanner.core.AppInfo
+import com.rawpos.scanner.core.net.CredentialStore
+import com.rawpos.scanner.core.net.Pairer
 import com.rawpos.scanner.core.settings.SettingsRepository
 import com.rawpos.scanner.core.transport.ScanTransport
 import com.rawpos.scanner.feature.connection.ConnectionViewModel
@@ -13,7 +15,9 @@ import com.rawpos.scanner.feature.settings.SettingsViewModel
 class AppViewModelFactory(
     private val settingsRepository: SettingsRepository,
     private val appInfo: AppInfo,
-    private val scanTransport: ScanTransport? = null,
+    private val transportProvider: () -> ScanTransport? = { null },
+    private val pairingClient: Pairer? = null,
+    private val credentialStore: CredentialStore? = null,
 ) : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")
@@ -25,7 +29,7 @@ class AppViewModelFactory(
             ConnectionViewModel() as T
 
         modelClass.isAssignableFrom(ScannerViewModel::class.java) ->
-            ScannerViewModel(scanTransport) as T
+            ScannerViewModel(transportProvider, pairingClient, credentialStore) as T
 
         modelClass.isAssignableFrom(DiagnosticsViewModel::class.java) ->
             DiagnosticsViewModel(appInfo) as T

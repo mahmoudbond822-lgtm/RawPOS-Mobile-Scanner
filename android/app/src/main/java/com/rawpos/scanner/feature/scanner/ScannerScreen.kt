@@ -87,6 +87,7 @@ fun ScannerScreen(
     onTorchChanged: (Boolean) -> Unit,
     onToggleZoom: () -> Unit,
     onCameraStarted: () -> Unit,
+    onTogglePairing: () -> Unit,
 ) {
     val context = LocalContext.current
     val view = LocalView.current
@@ -148,6 +149,7 @@ fun ScannerScreen(
                     paused = state.status == ScannerStatus.PAUSED,
                     torchOn = state.torchOn,
                     zoomOn = state.zoomOn,
+                    pairingMode = state.pairing != PairingStatus.OFF,
                     onFrame = onFrame,
                     onCameraStarted = onCameraStarted,
                 )
@@ -252,15 +254,44 @@ fun ScannerScreen(
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                val statusLine = when {
+                    state.pairing == PairingStatus.PAIRED ->
+                        stringResource(
+                            R.string.scanner_pair_paired,
+                            state.pairedDesktop ?: "",
+                        )
+
+                    state.pairing != PairingStatus.OFF -> stringResource(pairingText(state))
+
+                    else -> stringResource(submissionText(state))
+                }
                 Text(
-                    text = stringResource(submissionText(state)),
+                    text = statusLine,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = when (state.submission) {
-                        SubmissionStatus.FAILED -> MaterialTheme.colorScheme.error
-                        SubmissionStatus.DECIDED -> MaterialTheme.colorScheme.primary
+                    color = when {
+                        state.pairing == PairingStatus.FAILED -> MaterialTheme.colorScheme.error
+                        state.pairing == PairingStatus.PAIRED -> MaterialTheme.colorScheme.primary
+                        state.submission == SubmissionStatus.FAILED -> MaterialTheme.colorScheme.error
+                        state.submission == SubmissionStatus.DECIDED -> MaterialTheme.colorScheme.primary
                         else -> MaterialTheme.colorScheme.onSurfaceVariant
                     },
                 )
+                OutlinedButton(
+                    onClick = onTogglePairing,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("scanner_pair_button"),
+                ) {
+                    Text(
+                        text = stringResource(
+                            if (state.pairing == PairingStatus.OFF) {
+                                R.string.scanner_pair_start
+                            } else {
+                                R.string.scanner_pair_cancel
+                            },
+                        ),
+                    )
+                }
                 val rejection = state.rejection
                 if (rejection != null) {
                     Text(
@@ -312,6 +343,7 @@ private fun CameraPreview(
     paused: Boolean,
     torchOn: Boolean,
     zoomOn: Boolean,
+    pairingMode: Boolean,
     onFrame: (List<DecodedBarcode>, Long) -> Unit,
     onCameraStarted: () -> Unit,
 ) {
@@ -323,9 +355,17 @@ private fun CameraPreview(
     val currentOnStarted by rememberUpdatedState(onCameraStarted)
     var camera by remember { mutableStateOf<Camera?>(null) }
     val executor = remember { Executors.newSingleThreadExecutor() }
-    val scanner = remember { BarcodeScanning.getClient(BarcodeAnalyzer.scannerOptions()) }
+    val scanner = remember(pairingMode) {
+        BarcodeScanning.getClient(
+            if (pairingMode) {
+                BarcodeAnalyzer.pairingOptions()
+            } else {
+                BarcodeAnalyzer.scannerOptions()
+            },
+        )
+    }
 
-    DisposableEffect(lifecycleOwner) {
+    DisposableEffect(lifecycleOwner, pairingMode) {
         val future = ProcessCameraProvider.getInstance(context)
         var provider: ProcessCameraProvider? = null
         val bind = Runnable {
@@ -424,6 +464,15 @@ private fun statusKind(state: ScannerUiState): StatusKind = when {
     state.status == ScannerStatus.SENT -> StatusKind.SUCCESS
     state.status == ScannerStatus.PAUSED -> StatusKind.INFO
     else -> StatusKind.NEUTRAL
+}
+
+@StringRes
+private fun pairingText(state: ScannerUiState): Int = when (state.pairing) {
+    PairingStatus.WAITING_FOR_CODE -> R.string.scanner_pair_waiting
+    PairingStatus.PAIRING -> R.string.scanner_pair_pairing
+    PairingStatus.PAIRED -> R.string.scanner_pair_paired
+    PairingStatus.FAILED -> R.string.scanner_pair_failed
+    PairingStatus.OFF -> R.string.scanner_pair_start
 }
 
 @StringRes

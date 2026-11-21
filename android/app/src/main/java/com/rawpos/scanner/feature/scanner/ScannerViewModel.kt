@@ -9,7 +9,11 @@ import com.rawpos.scanner.core.barcode.RejectionReason
 import com.rawpos.scanner.core.barcode.ScanDecision
 import com.rawpos.scanner.core.barcode.ScanGate
 import com.rawpos.scanner.core.barcode.ValidationResult
+import com.rawpos.scanner.core.net.CredentialStore
 import com.rawpos.scanner.core.net.Delivery
+import com.rawpos.scanner.core.net.Pairer
+import com.rawpos.scanner.core.net.PairingError
+import com.rawpos.scanner.core.net.PairingResult
 import com.rawpos.scanner.core.transport.ScanTransport
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -38,6 +42,15 @@ enum class SubmissionStatus {
     FAILED,
 }
 
+/** Pairing is a mode of the scanner, because the QR needs the camera. */
+enum class PairingStatus {
+    OFF,
+    WAITING_FOR_CODE,
+    PAIRING,
+    PAIRED,
+    FAILED,
+}
+
 data class ScannerUiState(
     val status: ScannerStatus = ScannerStatus.IDLE,
     val lastCode: String? = null,
@@ -48,26 +61,32 @@ data class ScannerUiState(
     val submission: SubmissionStatus = SubmissionStatus.LOCAL_ONLY,
     val decidedStatus: String? = null,
     val failure: String? = null,
+    val pairing: PairingStatus = PairingStatus.OFF,
+    val pairedDesktop: String? = null,
+    val pairingError: String? = null,
 )
 
 /**
  * Scanner state for the screen.
  *
- * It owns the candidate gate, the last accepted value, and an optional transport. With no transport it
- * behaves exactly as Phase 3 did: the scan is shown locally and nothing leaves the device. With one, a
- * scan is submitted and the screen reports **only what the desktop decided** — never an optimistic
- * "added" (D13).
+ * Two modes share one screen because both need the camera:
  *
- * One scan is in flight at a time. While waiting, a new emit is dropped rather than queued (D15).
+ * - **product scanning** (default) validates digits, runs the gate, and submits at most one event at a
+ *   time, reporting only what the desktop decided (D13);
+ * - **pairing** decodes the desktop's QR, posts it, and stores the returned credentials (D3/A5).
+ *
+ * With no transport configured it behaves exactly as Phase 3: local only, nothing leaves the device.
  */
 class ScannerViewModel(
-    private val transport: ScanTransport? = null,
+    private val transportProvider: () -> ScanTransport? = { null },
+    private val pairingClient: Pairer? = null,
+    private val credentialStore: CredentialStore? = null,
     private val gate: ScanGate = ScanGate(),
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
         ScannerUiState(
-            submission = if (transport == null) {
+            submission = if (transportProvider() == null) {
                 SubmissionStatus.LOCAL_ONLY
             } else {
                 SubmissionStatus.IDLE
@@ -80,8 +99,33 @@ class ScannerViewModel(
         _state.update { it.copy(status = ScannerStatus.SCANNING) }
     }
 
+    /** True when the analyzer must decode QR instead of product formats. */
+    fun isPairingMode(): Boolean = _state.value.pairing != PairingStatus.OFF
+
+    fun startPairing() {
+        if (pairingClient == null) {
+            _state.update {
+                it.copy(pairing = PairingStatus.FAILED, pairingError = PairingError.REFUSED.name)
+            }
+            return
+        }
+        _state.update {
+            it.copy(pairing = PairingStatus.WAITING_FOR_CODE, pairingError = null, pairedDesktop = null)
+        }
+    }
+
+    fun cancelPairing() {
+        _state.update { it.copy(pairing = PairingStatus.OFF, pairingError = null) }
+    }
+
     /** One analyzed frame. Values are validated first; only accepted digits reach the gate. */
     fun onFrame(decoded: List<DecodedBarcode>, nowMillis: Long) {
+        if (isPairingMode()) {
+            decoded.firstOrNull { it.rawValue.startsWith("${com.rawpos.scanner.core.net.PairingUri.SCHEME}://") }
+                ?.let { pair(it.rawValue) }
+            return
+        }
+
         val accepted = LinkedHashMap<String, BarcodeFormat>()
         var lastRejection: RejectionReason? = null
         for (barcode in decoded) {
@@ -111,6 +155,32 @@ class ScannerViewModel(
         }
     }
 
+    private fun pair(raw: String) {
+        if (_state.value.pairing == PairingStatus.PAIRING) {
+            return
+        }
+        val client = pairingClient ?: return
+        _state.update { it.copy(pairing = PairingStatus.PAIRING, pairingError = null) }
+        viewModelScope.launch {
+            when (val result = client.pair(raw)) {
+                is PairingResult.Paired -> {
+                    credentialStore?.save(result.credentials)
+                    _state.update {
+                        it.copy(
+                            pairing = PairingStatus.PAIRED,
+                            pairedDesktop = result.credentials.desktopName,
+                            submission = SubmissionStatus.IDLE,
+                        )
+                    }
+                }
+
+                is PairingResult.Failed -> _state.update {
+                    it.copy(pairing = PairingStatus.FAILED, pairingError = result.error.name)
+                }
+            }
+        }
+    }
+
     private fun submit(value: String, format: BarcodeFormat) {
         _state.update {
             it.copy(
@@ -120,11 +190,13 @@ class ScannerViewModel(
                 scanCount = it.scanCount + 1,
             )
         }
-        val sender = transport
+        val sender = transportProvider()
         if (sender == null) {
             return
         }
-        _state.update { it.copy(submission = SubmissionStatus.WAITING, decidedStatus = null, failure = null) }
+        _state.update {
+            it.copy(submission = SubmissionStatus.WAITING, decidedStatus = null, failure = null)
+        }
         viewModelScope.launch {
             val delivery = runCatching { sender.submit(value, format.wireName()) }.getOrNull()
             when (delivery) {
@@ -140,6 +212,14 @@ class ScannerViewModel(
                     it.copy(submission = SubmissionStatus.FAILED, failure = "UNCERTAIN")
                 }
             }
+        }
+    }
+
+    fun togglePairing() {
+        if (_state.value.pairing == PairingStatus.OFF) {
+            startPairing()
+        } else {
+            cancelPairing()
         }
     }
 

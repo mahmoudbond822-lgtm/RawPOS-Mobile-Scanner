@@ -59,6 +59,12 @@
     <string name="scanner_send_expired">انتهت صلاحية المسح — أعد المسح</string>
     <string name="scanner_send_unauthorized">غير مربوط — أعد ربط الهاتف</string>
     <string name="scanner_send_refused">رفض الجهاز هذا المسح</string>
+    <string name="scanner_pair_start">ربط جهاز كاشير</string>
+    <string name="scanner_pair_cancel">إلغاء الربط</string>
+    <string name="scanner_pair_waiting">وجّه الكاميرا إلى رمز الربط على جهاز الكاشير</string>
+    <string name="scanner_pair_pairing">في انتظار الموافقة على جهاز الكاشير</string>
+    <string name="scanner_pair_paired">تم الربط مع %1$s</string>
+    <string name="scanner_pair_failed">تعذر الربط - حاول مرة أخرى</string>
 
     <string name="settings_appearance">المظهر</string>
     <string name="settings_language">اللغة</string>

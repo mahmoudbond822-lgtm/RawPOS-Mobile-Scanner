@@ -112,6 +112,7 @@ fun RawPosNavHost(
                     onTorchChanged = viewModel::setTorch,
                     onToggleZoom = viewModel::toggleZoom,
                     onCameraStarted = viewModel::onCameraStarted,
+                    onTogglePairing = viewModel::togglePairing,
                 )
             }
 

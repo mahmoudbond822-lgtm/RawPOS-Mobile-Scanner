@@ -44,7 +44,7 @@ class ScannerViewModelTest {
     @Test
     fun `a stable valid code is recorded once`() = runTest(dispatcher) {
         val transport = FakeTransport()
-        val viewModel = ScannerViewModel(transport = transport, gate = ScanGate())
+        val viewModel = ScannerViewModel(transportProvider = { transport }, gate = ScanGate())
 
         viewModel.onFrame(frame("6291041500213"), 0L)
         viewModel.onFrame(frame("6291041500213"), 100L)
@@ -57,7 +57,7 @@ class ScannerViewModelTest {
 
     @Test
     fun `without a transport the scan stays local`() = runTest(dispatcher) {
-        val viewModel = ScannerViewModel(transport = null)
+        val viewModel = ScannerViewModel(transportProvider = { null })
 
         viewModel.onFrame(frame("123456"), 0L)
         viewModel.onFrame(frame("123456"), 100L)
@@ -70,7 +70,7 @@ class ScannerViewModelTest {
     fun `a decided scan shows the desktop status`() = runTest(dispatcher) {
         val transport = FakeTransport()
         transport.replyWith(Delivery.Decided(status = "merged", context = "c"))
-        val viewModel = ScannerViewModel(transport = transport)
+        val viewModel = ScannerViewModel(transportProvider = { transport })
 
         viewModel.onFrame(frame("123456"), 0L)
         viewModel.onFrame(frame("123456"), 100L)
@@ -85,7 +85,7 @@ class ScannerViewModelTest {
     fun `an uncertain delivery is reported as a failure, not success`() = runTest(dispatcher) {
         val transport = FakeTransport()
         transport.fail(DeliveryError.UNCERTAIN)
-        val viewModel = ScannerViewModel(transport = transport)
+        val viewModel = ScannerViewModel(transportProvider = { transport })
 
         viewModel.onFrame(frame("123456"), 0L)
         viewModel.onFrame(frame("123456"), 100L)
@@ -107,7 +107,7 @@ class ScannerViewModelTest {
                 return Delivery.Decided("added", null)
             }
         }
-        val viewModel = ScannerViewModel(transport = hanging)
+        val viewModel = ScannerViewModel(transportProvider = { hanging })
 
         viewModel.onFrame(frame("111"), 0L)
         viewModel.onFrame(frame("111"), 100L)
@@ -126,7 +126,7 @@ class ScannerViewModelTest {
     @Test
     fun `a non-numeric payload is rejected and never submitted`() = runTest(dispatcher) {
         val transport = FakeTransport()
-        val viewModel = ScannerViewModel(transport = transport)
+        val viewModel = ScannerViewModel(transportProvider = { transport })
 
         viewModel.onFrame(frame("ABC-123", format = BarcodeFormat.CODE_128), 0L)
         viewModel.onFrame(frame("ABC-123", format = BarcodeFormat.CODE_128), 100L)
@@ -160,7 +160,7 @@ class ScannerViewModelTest {
     @Test
     fun `pause stops emitting and resume restarts`() = runTest(dispatcher) {
         val transport = FakeTransport()
-        val viewModel = ScannerViewModel(transport = transport)
+        val viewModel = ScannerViewModel(transportProvider = { transport })
 
         viewModel.togglePause()
         viewModel.onFrame(frame("123456"), 0L)
@@ -201,5 +201,98 @@ class ScannerViewModelTest {
         assertEquals("ean_13", BarcodeFormat.EAN_13.wireName())
         assertEquals("code_128", BarcodeFormat.CODE_128.wireName())
         assertEquals("unknown", BarcodeFormat.UNKNOWN.wireName())
+    }
+
+    // -- pairing ------------------------------------------------------------
+
+    private class RecordingStore : com.rawpos.scanner.core.net.CredentialStore {
+        var saved: com.rawpos.scanner.core.net.Credentials? = null
+        override fun load() = saved
+        override fun save(credentials: com.rawpos.scanner.core.net.Credentials) {
+            saved = credentials
+        }
+        override fun clear() {
+            saved = null
+        }
+    }
+
+    private class FakePairer(private val result: com.rawpos.scanner.core.net.PairingResult) :
+        com.rawpos.scanner.core.net.Pairer {
+        var calls = 0
+        override suspend fun pair(rawUri: String): com.rawpos.scanner.core.net.PairingResult {
+            calls += 1
+            return result
+        }
+    }
+
+    @Test
+    fun `pairing stores the credentials and reports the desktop`() = runTest(dispatcher) {
+        val store = RecordingStore()
+        val credentials = com.rawpos.scanner.core.net.Credentials(
+            baseUrl = "https://192.168.1.20:47653",
+            deviceId = "device",
+            pin = "pin",
+            token = "rps1_token",
+            desktopName = "Front Counter",
+        )
+        val viewModel = ScannerViewModel(
+            transportProvider = { null },
+            pairingClient = FakePairer(com.rawpos.scanner.core.net.PairingResult.Paired(credentials)),
+            credentialStore = store,
+        )
+
+        viewModel.startPairing()
+        viewModel.onFrame(
+            listOf(DecodedBarcode("rawpos://pair?v=1", BarcodeFormat.QR)),
+            0L,
+        )
+        advanceUntilIdle()
+
+        assertEquals(PairingStatus.PAIRED, viewModel.state.value.pairing)
+        assertEquals("Front Counter", viewModel.state.value.pairedDesktop)
+        assertEquals("rps1_token", store.saved?.token)
+        assertEquals(SubmissionStatus.IDLE, viewModel.state.value.submission)
+    }
+
+    @Test
+    fun `pairing failure is reported and nothing is stored`() = runTest(dispatcher) {
+        val store = RecordingStore()
+        val viewModel = ScannerViewModel(
+            transportProvider = { null },
+            pairingClient = FakePairer(
+                com.rawpos.scanner.core.net.PairingResult.Failed(
+                    com.rawpos.scanner.core.net.PairingError.DENIED,
+                ),
+            ),
+            credentialStore = store,
+        )
+
+        viewModel.startPairing()
+        viewModel.onFrame(
+            listOf(DecodedBarcode("rawpos://pair?v=1", BarcodeFormat.QR)),
+            0L,
+        )
+        advanceUntilIdle()
+
+        assertEquals(PairingStatus.FAILED, viewModel.state.value.pairing)
+        assertEquals("DENIED", viewModel.state.value.pairingError)
+        assertEquals(null, store.saved)
+    }
+
+    @Test
+    fun `non pairing codes are ignored while pairing`() = runTest(dispatcher) {
+        val pairer = FakePairer(
+            com.rawpos.scanner.core.net.PairingResult.Failed(
+                com.rawpos.scanner.core.net.PairingError.REFUSED,
+            ),
+        )
+        val viewModel = ScannerViewModel(transportProvider = { null }, pairingClient = pairer)
+
+        viewModel.startPairing()
+        viewModel.onFrame(listOf(DecodedBarcode("6291041500213", BarcodeFormat.EAN_13)), 0L)
+        advanceUntilIdle()
+
+        assertEquals(0, pairer.calls)
+        assertEquals(PairingStatus.WAITING_FOR_CODE, viewModel.state.value.pairing)
     }
 }
