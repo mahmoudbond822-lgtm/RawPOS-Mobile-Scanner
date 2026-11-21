@@ -362,6 +362,59 @@ The receiver therefore cannot be started by a user, which is the correct state u
 
 ---
 
+## Increment 5b — shell wiring and lifecycle
+
+### What changed
+
+| File | Change |
+|---|---|
+| `src/rawpos/ui/main_window.py` | A **Mobile scanner** file-menu action, disabled when no callback is supplied |
+| `src/rawpos/ui/app_shell.py` | Lazy controller, stable desktop id, `open_mobile_scanner`, `shutdown_mobile`, stop on sign-out and on recovery |
+| `src/rawpos/app.py` | Stops the listener first in the shutdown `finally` block, before the DB is detached and closed |
+| `tests/gui/test_mobile_shell_wiring.py` | 6 tests |
+| `tests/gui/test_main_window.py` | 2 tests for the action |
+| `tests/integration/test_app_shutdown.py` | Stub extended, plus an assertion that the hook fires on the real exit path |
+
+### Lifecycle, verified rather than described
+
+| Event | Behaviour | Proof |
+|---|---|---|
+| Application start | no controller, no socket | `test_controller_is_not_created_until_the_dialog_opens` |
+| Menu action | opens the dialog; disabled if the shell supplies no callback | 2 main-window tests |
+| Sign-out | listener stopped before the login screen mounts | `test_sign_out_stops_the_receiver` |
+| Enter recovery | listener stopped **before** the database closes | `test_entering_recovery_stops_the_receiver_first` |
+| App shutdown | listener stopped before DB detach/close | assertion in `test_clean_exit_checkpoints_the_wal_…` |
+
+The shutdown `finally` block is where this matters most: an exception on the way out must not leave a
+listener holding a half-closed application. The existing shutdown test now asserts the hook ran.
+
+### Details worth recording
+
+- **Desktop id** is a 16-hex-character value persisted in `mobile/desktop_id`, generated once, and
+  carried in the QR. It is deliberately *not* a secret and not in `config.json`.
+- **Desktop name** in the QR is the machine hostname; the cashier sees it on the phone.
+- **Enable is still manual.** Startup never calls `start()`; a signed-in user must open the dialog and
+  press Enable (D6).
+- **Owner gating is unchanged**: the menu item is visible to everyone, but pairing and revoke are
+  refused by the controller for a cashier (A14). Enable/disable remain open to any signed-in actor.
+
+### Gates after the change
+
+| Gate | Command | Result |
+|---|---|---|
+| Lint | `py -3 -m ruff check .` | `All checks passed!` |
+| Types | `py -3 -m mypy src` | `Success: no issues found in 157 source files` |
+| Money-path guard | `py -3 scripts/check_no_float.py` | `no-float gate: PASS` |
+| Full suite | `py -3 -m pytest -q` | **1603 passed in 103.25s** |
+
+### Phase 2 status
+
+All five increments are delivered: protocol, registry, pairing, TLS, listener, controller, dialog, and
+wiring. The phase is **functionally complete**; what remains is the closure report (scope compliance
+against the packet) and the merge decision, which is not mine to take.
+
+---
+
 ## Open items in this phase
 
 1. **Android SAS vector** — the derivation from increment 2 must be reproduced by the Android client
@@ -369,11 +422,11 @@ The receiver therefore cannot be started by a user, which is the correct state u
 2. **Android pin verification** — the client must compute the same SPKI pin and fail closed on mismatch.
 3. **`device_already_paired`** — needs its own typed code in Phase 4 contract fixtures; currently mapped
    to `409 pairing_used`, which is imprecise but unreachable through the dialog.
-4. **Application wiring (5b)** — menu entry, explicit enable, and stop on sign-out, recovery, and
-   shutdown. Until then the dialog has no caller.
-5. **Arabic review** — the 30 new keys are written but not reviewed by a native speaker (Q22).
-6. **`waitress` decision** — pre-approved as the Phase 7 remedy if fuzzing fails; not adopted now.
-7. **Temporary key file** — inherent to Python's TLS API; documented in `tls.py` and above.
+4. **Arabic review** — the 30 new keys are written but not reviewed by a native speaker (Q22).
+5. **Closure report** — `scope-compliance.md` for this phase, against the packet's stated scope.
+6. **Merge decision** — `feature/mobile-receiver` into RawPOS `main` still requires separate approval.
+7. **`waitress` decision** — pre-approved as the Phase 7 remedy if fuzzing fails; not adopted now.
+8. **Temporary key file** — inherent to Python's TLS API; documented in `tls.py` and above.
 
-Codec selection is no longer an open item: `MobileLinkController.enable` derives it from the
-identity's recorded mode.
+Application wiring is no longer an open item: the menu action, explicit enable, and the three stop
+paths are implemented and tested.

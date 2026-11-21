@@ -129,8 +129,8 @@ artifacts, no business logic present.
 
 ## Phase 2 — Desktop receiver and secure pairing
 
-**Status:** **authorized 2026-11-20; in progress.** Increments 1–2 (protocol, registry, pairing state
-machine) are complete: see `../phase-2/build-evidence.md`. TLS, server, dialog, and wiring remain.
+**Status:** **authorized 2026-11-20; functionally complete 2026-11-21.** All five increments are
+delivered (`../phase-2/build-evidence.md`); the closure report and the merge decision remain.
 **Duration:** 2 weeks (one desktop engineer).
 **Depends on:** A3, A4, A5, A6, A7, A8, A14, A16, and A17 — **all approved 2026-11-20** (briefs in
 `approval-packet-phase-2.md`). The phase itself was **authorized 2026-11-20** (same packet, §9).
