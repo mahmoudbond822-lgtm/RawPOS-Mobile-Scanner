@@ -302,6 +302,66 @@ was deliberately not invented here, because adding a protocol error code is an A
 
 ---
 
+## Increment 5a — controller, dialog, and localization
+
+### What was added
+
+| File | Purpose |
+|---|---|
+| `src/rawpos/mobile/controller.py` | Owner-gated lifecycle: enable, disable, pair, approve, deny, revoke |
+| `src/rawpos/mobile/protocol.py` | `build_pairing_uri` — the QR payload from §4.2 |
+| `src/rawpos/ui/mobile_scanner_dialog.py` | Receiver toggle, QR, countdown, code, approve/deny, revoke |
+| `src/rawpos/localization/__init__.py` | 30 `mobile.*` keys in **both** catalogs |
+| `pyproject.toml` | `segno==1.6.6` pinned (A4, now actually used) |
+| `tests/integration/test_mobile_controller.py` | 11 tests |
+| `tests/gui/test_mobile_scanner_dialog.py` | 9 tests |
+
+### Where the owner rule lives
+
+A14 is enforced in the controller, not only by disabling buttons:
+
+- `enable`, `begin_pairing`, `approve`, `deny`, `revoke` call `require_owner()` and raise
+  `NotAdministrator` (the existing domain exception) for a cashier.
+- `disable`/`stop` are **ungated**, so sign-out, recovery, and shutdown can always quiesce the
+  listener (D22). A test flips the owner flag mid-session and proves both directions.
+
+The dialog disables the same controls, but that is convenience; hiding a button is not the boundary.
+
+### Two increment-4 gaps closed
+
+1. **Codec selection is no longer a convention.** `enable()` reads the identity's recorded protection
+   mode and builds the registry with `DpapiCodec` or `PlainCodec` accordingly.
+2. **Pairing has a caller.** `begin_pairing` → QR → phone submits → `approve` issues the token.
+
+### QR contract
+
+`build_pairing_uri` emits `rawpos://pair?v=1&host=…&port=…&sid=…&secret=…&pin=…&did=…&name=…&exp=…`,
+URL-encoded, with **no token and no business data**. A test asserts each field is present and that the
+name is encoded.
+
+### Localization
+
+All 30 keys exist in `ar` and `en`. The Arabic copy is written but **not reviewed by a native
+speaker** — recorded as an open item against Q22 rather than presented as final.
+
+### Gates after the change
+
+| Gate | Command | Result |
+|---|---|---|
+| Lint | `py -3 -m ruff check .` | `All checks passed!` |
+| Types | `py -3 -m mypy src` | `Success: no issues found in 157 source files` |
+| Money-path guard | `py -3 scripts/check_no_float.py` | `no-float gate: PASS` |
+| Full suite | `py -3 -m pytest -q` | **1594 passed in 103.49s** |
+
+1594 = 1574 + 11 controller + 9 dialog.
+
+### Still not reachable
+
+The dialog has **no caller**: there is no menu item, no startup hook, and no stop-on-sign-out wiring.
+The receiver therefore cannot be started by a user, which is the correct state until increment 5b.
+
+---
+
 ## Open items in this phase
 
 1. **Android SAS vector** — the derivation from increment 2 must be reproduced by the Android client
@@ -309,14 +369,11 @@ was deliberately not invented here, because adding a protocol error code is an A
 2. **Android pin verification** — the client must compute the same SPKI pin and fail closed on mismatch.
 3. **`device_already_paired`** — needs its own typed code in Phase 4 contract fixtures; currently mapped
    to `409 pairing_used`, which is imprecise but unreachable through the dialog.
-4. **Dialog and application wiring** (increment 5) — the receiver is inert; nothing calls `start()`,
-   and the owner-only gate (A14) lives there.
-5. **Codec selection** — the caller must construct the registry with `DpapiCodec` when the identity mode
-   is DPAPI and `PlainCodec` when it is the ACL fallback. Increment 5 should make that pairing
-   automatic rather than a convention.
+4. **Application wiring (5b)** — menu entry, explicit enable, and stop on sign-out, recovery, and
+   shutdown. Until then the dialog has no caller.
+5. **Arabic review** — the 30 new keys are written but not reviewed by a native speaker (Q22).
 6. **`waitress` decision** — pre-approved as the Phase 7 remedy if fuzzing fails; not adopted now.
 7. **Temporary key file** — inherent to Python's TLS API; documented in `tls.py` and above.
 
-Registry protection is no longer missing: `DeviceRegistry` accepts a codec, and `tls.DpapiCodec`
-provides it. What remains is the wiring in item 5, so a plain registry file can still be created by a
-caller that forgets to pass a codec.
+Codec selection is no longer an open item: `MobileLinkController.enable` derives it from the
+identity's recorded mode.
