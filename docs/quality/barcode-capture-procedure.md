@@ -50,27 +50,24 @@ license is only accepted on the machine it was issued for. Therefore:
 - Export the barcode column **there**, then bring the CSV over. Do not copy the license file to another
   machine and do not attempt to open the database elsewhere; both are licensing-integrity issues.
 
-Run on the shop PC, with the RawPOS application **closed**, and only against a copy:
+Run on the machine where the licence that protects this database is valid (the shop PC, or this
+machine if the database originated here), with the RawPOS application **closed**:
 
 ```powershell
 # 1. copy the database (app closed)
 Copy-Item "$env:LOCALAPPDATA\RawPOS\data\rawpos.db" "$env:USERPROFILE\rawpos-copy.db"
 
 # 2. export one column, barcode only
-python -c "import sqlite3,sys; from rawpos.app import build_context; ..."
+py -3 tools/export_barcodes.py `
+    --db "$env:USERPROFILE\rawpos-copy.db" `
+    --out "$env:USERPROFILE\rawpos-barcode-audit\barcodes.csv"
 ```
 
-The exact export command depends on how the shop install is deployed; the requirement is only that it
-produces:
+`export_barcodes.py` refuses the configured live database path, works on a temporary sibling copy so
+the file you pass cannot be modified, prints only a count and a length histogram, and fails with a
+clear message when the machine's licence is not valid for that database.
 
-```csv
-barcode
-6291041500213
-012345678905
-```
-
-One column, every product row, including inactive products (marked later, not filtered here). If the
-export tool cannot be run, stop and say so — a guessed format set is worse than a missing one.
+If the licence is not valid there, stop and say so — a guessed format set is worse than a missing one.
 
 ---
 
