@@ -303,7 +303,8 @@ found/reject/duplicate/uncertain; evidence recorded.
 
 ## Phase 5 — RawPOS integration adapter
 
-**Status:** **authorized 2026-11-21 (A28); not started.** Briefs: `approval-packet-phase-5.md`.
+**Status:** **authorized 2026-11-21 (A28); complete 2026-11-21.** Briefs:
+`approval-packet-phase-5.md`; closure: `../phase-5/scope-compliance.md`.
 
 **Duration:** 1.5 weeks (desktop engineer).
 **Depends on:** **A2 approval** (`resolve_barcode`); Phase 4.

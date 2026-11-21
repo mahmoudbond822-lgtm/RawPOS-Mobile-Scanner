@@ -18,12 +18,14 @@ This file is for any coding agent (OpenCode, Claude Code, Codex, or similar) tha
 `docs/phase-4/`. A phone pairs over the real QR, scans a label, and is told the truth; the cart is not
 touched.
 
-**Phase 5 (RawPOS integration) is authorized as of 2026-11-21 (A28) and has not started.** Scope is
-fixed by `docs/planning/approval-packet-phase-5.md`: `resolve_barcode()` (exact-only), the additive
-`CheckoutView.submit_scan()` with a shared renderer, the queued GUI-thread controller, the admission
-policy, and the checkout status chip.
+**Phase 5 (RawPOS integration) is complete** as of 2026-11-21. Evidence and closure:
+`docs/phase-5/`. A mobile scan reaches the checkout view, renders exactly like a keyboard scan, and is
+refused cleanly when the till cannot accept it.
 
-**Not authorized:** anything beyond Phase 5 — release packaging, performance tuning, security fuzzing.
+**Phase 6 (integration and regression testing) is not authorized.** The hardware end-to-end run has not
+happened yet: install the APK, pair, scan a label, and confirm the line appears on the till.
+
+**Not authorized:** release packaging, performance tuning, security fuzzing.
 **Do not** change money, pricing, discounts, stock, shifts, invoice finalization, audit semantics, or the
 schema; the keyboard-wedge tests must pass unmodified.
 
