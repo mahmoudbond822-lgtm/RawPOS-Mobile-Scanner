@@ -131,7 +131,7 @@ existing callers. Without it, product scanning does not ship.
 
 ### D10 — Three-layer duplicate suppression, desktop authoritative
 
-**Status:** PROPOSED
+**Status:** **APPROVED — owner, 2026-11-21 (A12)**
 **Decision:** camera stabilizer + one event id per physical scan + desktop idempotency keyed by
 `(device_id, event_id)`, reserve-before-dispatch, 24 h / 50k, fail closed when full.
 **Rationale:** one physical scan must never add two units; retries must be safe; deliberate double scans
@@ -198,7 +198,7 @@ name search. Disabled formats can be enabled per shop after verification.
 
 ### D15 — No offline scan queue
 
-**Status:** PROPOSED
+**Status:** **APPROVED — owner, 2026-11-21 (A12, same decision as D20)**
 **Decision:** the phone never stores scans for later automatic delivery; one in-flight event may retry
 within 15 s; older scans expire and must be rescanned.
 **Rationale:** a queued scan can land in a different invoice or after the customer left; silent replay is
@@ -269,7 +269,7 @@ Qt `QTcpServer` (manual HTTP, worse).
 
 ### D20 — Uncertain delivery across a desktop restart
 
-**Status:** PROPOSED
+**Status:** **APPROVED — owner, 2026-11-21 (A12)**
 **Decision:** `server_instance_id` changes on restart. The phone does **not** auto-replay an
 unacknowledged event across a restart; it shows "Delivery uncertain — check the desktop".
 **Rationale:** the cart is in memory; a replay could duplicate or land in a new sale. A missed scan is
@@ -393,7 +393,7 @@ open, and A10/A11 remain unsigned.
 | Q14 | Is one new QR dependency (`segno`) acceptable? | **Yes**; it is pure Python with no transitive dependencies. |
 | Q15 | Is `waitress` acceptable if `http.server` fails fuzzing? | **Yes**, as a release-gate contingency. |
 | Q16 | Who may pair/revoke: owner only, or any signed-in cashier? | **Owner only** for pairing and revoke; any signed-in cashier may enable the receiver and connect an already-paired phone. **Decided — A14, 2026-11-20.** |
-| Q17 | Is process-lifetime dedupe acceptable (no exactly-once across a desktop crash)? | **Yes**, with "delivery uncertain" UX. |
+| Q17 | Is process-lifetime dedupe acceptable (no exactly-once across a desktop crash)? | **Yes**, with "delivery uncertain" UX. **Decided — A12, 2026-11-21.** |
 | Q18 | What is the shop LAN topology (guest isolation, multiple APs, static DHCP)? | Needed before Phase 6; client isolation must be documented as unsupported. |
 
 ### Android and delivery
@@ -452,7 +452,7 @@ authoritative; the packet only restates them.
 | A9 | Mobile admission policy: active Sales + full mode + open shift + no modal + no transition | D17 | **✅ APPROVED — 2026-11-20** |
 | A10 | Exact-only UPC/EAN behavior | D14/R13 | ☐ — deferred to Phase 5; needs real 12/13-digit data, which does not exist yet |
 | A11 | Enabled/disabled barcode formats | D14 | **✅ APPROVED PROVISIONALLY — 2026-11-21** (D14 defaults; pre-pilot verification against real labels is mandatory) |
-| A12 | Process-lifetime dedupe / uncertain delivery | D20 | ☐ |
+| A12 | Process-lifetime dedupe / uncertain delivery | D10/D15/D20 | **✅ APPROVED — 2026-11-21** (in-memory dedupe, no auto-replay, no offline queue) |
 | A13 | Android platform baseline: Kotlin/Compose, minSdk 26, targetSdk 36, subject to documented compatibility constraints | D21 | **✅ APPROVED — 2026-11-20** |
 | A14 | Owner-only pairing/revocation | Q16 | **✅ APPROVED — 2026-11-20** (owner-only for both pairing and revoke) |
 | A15 | Phase 1 authorization (Android foundation only) | — | **✅ RECORDED — 2026-11-20** (see note) |
@@ -478,9 +478,10 @@ the owner should confirm the original approval date so the register and the road
 **Phase 2 itself is a separate line** (`approval-packet-phase-2.md` §9). Every Phase 2 prerequisite is
 approved, and the phase was **authorized 2026-11-20** and merged 2026-11-21.
 
-**Remaining open items:** **A1** (reconciliation — needs the owner's Phase 0 approval date), **A10**
-(exact-only UPC/EAN — Phase 5, needs real 12/13-digit data), and **A12** (process-lifetime dedupe —
-Phase 4).
+**Remaining open items:** **A1** (reconciliation — needs the owner's Phase 0 approval date) and **A10**
+(exact-only UPC/EAN — Phase 5, needs real 12/13-digit data). **A12 was approved 2026-11-21**, which also
+approved D10 (dedupe table) and D15 (no offline queue) — the three had to move together, because the
+Phase 4 contract depends on all of them.
 
 ---
 

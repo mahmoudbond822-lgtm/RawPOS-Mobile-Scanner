@@ -14,8 +14,8 @@ This file is for any coding agent (OpenCode, Claude Code, Codex, or similar) tha
 **Phase 3 (Android camera and barcode scanning) is complete** as of 2026-11-21. Evidence and closure:
 `docs/phase-3/`. The app scans real labels on the POCO X3, and three instrumented tests pass on it.
 
-**Phase 4 (scan protocol and acknowledgment) is not authorized.** A12 (process-lifetime dedupe and
-uncertain delivery) is still unsigned.
+**Phase 4 (scan protocol and acknowledgment) is not authorized.** A12 was approved 2026-11-21, so the
+phase is unblocked on decisions and waits only on its own authorization.
 
 **Not authorized:** any network call or pairing client, `POST /v1/scans`, `GET /v1/context`,
 `CheckoutService.resolve_barcode()`, any `CheckoutView` change, and any change to the sibling RawPOS

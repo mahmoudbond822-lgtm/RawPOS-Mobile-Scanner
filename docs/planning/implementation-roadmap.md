@@ -248,7 +248,9 @@ performance baseline recorded.
 ## Phase 4 — Communication and acknowledgment protocol
 
 **Duration:** 1.5 weeks (Android + desktop).
-**Depends on:** Phase 2 (server) and Phase 3 (scanner).
+**Depends on:** Phase 2 (server) and Phase 3 (scanner) — both complete. **A12 approved 2026-11-21**
+(process-lifetime dedupe, uncertain delivery, no offline queue). The phase itself is not authorized
+until its own authorization line is given.
 
 ### Objectives
 
