@@ -247,8 +247,9 @@ performance baseline recorded.
 
 ## Phase 4 — Communication and acknowledgment protocol
 
-**Status:** **authorized 2026-11-21 (A24); in progress** — increment 1 (contract fixtures) complete.
-Briefs and scope: `approval-packet-phase-4.md`; evidence: `../phase-4/build-evidence.md`.
+**Status:** **authorized 2026-11-21 (A24); in progress** — increments 1 (contract fixtures) and 2
+(desktop routes) complete. Briefs: `approval-packet-phase-4.md`; design:
+`../architecture/desktop-scan-routes.md`; evidence: `../phase-4/build-evidence.md`.
 
 **Duration:** 1.5 weeks (Android + desktop).
 **Depends on:** Phase 2 (server) and Phase 3 (scanner) — both complete. **A12 approved 2026-11-21**
