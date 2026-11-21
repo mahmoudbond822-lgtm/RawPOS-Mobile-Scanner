@@ -319,7 +319,7 @@ Signing a row authorizes **only** that item, for Phase 2, as described above. Si
 | A7 | Inbound TCP 47653, Private profile, LocalSubnet only, with a port-conflict path | D6 | Approved as specified | 2026-11-20 |
 | A8 | `http.server` + hardened handler, `waitress` pre-approved as the Phase 7 fallback | D19 | Approved as specified | 2026-11-20 |
 | A14 | Owner-only pairing and revocation; any signed-in user may enable/connect | Q16 | Owner-only for pairing and revoke | 2026-11-20 |
-| A16 | RawPOS write authorization on a dedicated branch, including the narrow no-network test amendment | AGENTS §7 / A3 | Dedicated branch; no push, no merge | 2026-11-20 |
+| A16 | RawPOS write authorization on a dedicated branch, including the narrow no-network test amendment | AGENTS §7 / A3 | Dedicated branch; push authorized 2026-11-21, merge not | 2026-11-20 |
 | A17 | Gradle dependency locking now — or explicit deferral with risk accepted | Phase 1 §5.5 | Lock now; exact `segno` pin | 2026-11-20 |
 
 **Recorded:** the decisions above were given by the owner in session on 2026-11-20 and are recorded as
