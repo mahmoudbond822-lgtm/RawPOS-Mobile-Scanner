@@ -35,7 +35,7 @@ shared database (rejected: bypasses services, SQLCipher coupling).
 
 ### D2 — HTTP/1.1 + JSON over TLS, not WebSocket
 
-**Status:** PROPOSED
+**Status:** **APPROVED — owner, 2026-11-21 (A19)**
 **Decision:** one authenticated `POST /v1/scans` per scan, response after business processing.
 **Rationale:** request/response matches scan semantics; simple to test, reason about, and secure;
 WebSocket adds state without a v1 requirement.
@@ -69,7 +69,7 @@ IP); user-installed CA (operational burden); trust-on-first-use (rejected: MITM)
 
 ### D5 — Desktop-generated 256-bit device token, hash at rest, Keystore on phone
 
-**Status:** PROPOSED
+**Status:** **APPROVED — owner, 2026-11-21 (A20)** (retroactive for the desktop half shipped in Phase 2)
 **Decision:** desktop generates the token, returns it once over pinned TLS, stores a domain-separated
 SHA-256 verifier; the phone stores the token with Android Keystore AES-GCM and backup disabled.
 **Rationale:** simple, revocable, scan-only; no plaintext token at rest on the desktop.
@@ -143,7 +143,7 @@ a client bug corrupts the cart); server-only (rejected: network flood).
 
 ### D11 — Checkout-context token
 
-**Status:** PROPOSED
+**Status:** **APPROVED — owner, 2026-11-21 (A21)**
 **Decision:** an opaque token derived from the current invoice identity (`invoice_id`, `created_at`,
 `status`) travels with each scan; a mismatch rejects with `rejected_stale_context` and no mutation.
 **Rationale:** prevents a delayed scan from landing in the next invoice after finalize/hold/resume.
@@ -169,7 +169,7 @@ RawPOS backup, so document that.
 
 ### D13 — Truthful status ladder
 
-**Status:** PROPOSED
+**Status:** **APPROVED — owner, 2026-11-21 (A22)**
 **Decision:** `added` / `merged` only after the desktop confirms the cart mutation; transport receipt,
 authentication, validation, dispatch, and resolution are distinct internal stages and never shown as
 success.
@@ -459,6 +459,12 @@ authoritative; the packet only restates them.
 | A16 | RawPOS write authorization on a dedicated branch, including the narrow no-network test amendment | `AGENTS.md` §7 / A3 | **✅ APPROVED — 2026-11-20** (dedicated branch; branch push authorized 2026-11-21; **merge to `main` authorized and performed 2026-11-21**, merge commit `7efa178`) |
 | A17 | Dependency locking before Phase 2, or an explicit recorded deferral | `../phase-1/scope-compliance.md` §5.5 | **✅ APPROVED — 2026-11-20** (Gradle locking + exact `segno` pin) |
 | A18 | Phase 3 authorization: Android camera and barcode scanning, no network | — | **✅ APPROVED — 2026-11-21** |
+| A19 | HTTP/1.1 + JSON over TLS, request/response | D2 | **✅ APPROVED — 2026-11-21** |
+| A20 | Desktop-generated token, hash at rest, Keystore on phone | D5 | **✅ APPROVED — 2026-11-21** (retroactive for the shipped desktop half) |
+| A21 | Checkout-context token | D11 | **✅ APPROVED — 2026-11-21** |
+| A22 | Truthful status ladder | D13 | **✅ APPROVED — 2026-11-21** |
+| A23 | `INTERNET` permission + pinned OkHttp | D21 residue | **✅ APPROVED — 2026-11-21** |
+| A24 | Phase 4 authorization | — | **✅ APPROVED — 2026-11-21** |
 
 **A15 reconciliation (2026-11-20).** A15 had remained unchecked while Phase 1 was authorized and delivered.
 Its status is **recorded from the existing Phase 1 authorization** (“Android Foundation Only”) and the
@@ -479,9 +485,8 @@ the owner should confirm the original approval date so the register and the road
 approved, and the phase was **authorized 2026-11-20** and merged 2026-11-21.
 
 **Remaining open items:** **A1** (reconciliation — needs the owner's Phase 0 approval date) and **A10**
-(exact-only UPC/EAN — Phase 5, needs real 12/13-digit data). **A12 was approved 2026-11-21**, which also
-approved D10 (dedupe table) and D15 (no offline queue) — the three had to move together, because the
-Phase 4 contract depends on all of them.
+(exact-only UPC/EAN — Phase 5, needs real 12/13-digit data). Everything Phase 4 implements was approved
+2026-11-21: A12 with D10 and D15, then A19–A24.
 
 ---
 

@@ -136,11 +136,14 @@ transport that stops at a fake dispatcher.
 
 | # | Item | Decision | Owner | Date |
 |---|---|---|---|---|
-| A19 | HTTP/1.1 + JSON over TLS, request/response | D2 | | |
-| A20 | Desktop-generated token, hash at rest, Keystore | D5 | | |
-| A21 | Checkout-context token | D11 | | |
-| A22 | Truthful status ladder | D13 | | |
-| A23 | `INTERNET` permission + OkHttp | D21 residue | | |
-| A24 | Phase 4 authorization | — | | |
+| A19 | HTTP/1.1 + JSON over TLS, request/response | D2 | Approved as specified | 2026-11-21 |
+| A20 | Desktop-generated token, hash at rest, Keystore | D5 | Approved as specified | 2026-11-21 |
+| A21 | Checkout-context token | D11 | Approved as specified | 2026-11-21 |
+| A22 | Truthful status ladder | D13 | Approved as specified | 2026-11-21 |
+| A23 | `INTERNET` permission + OkHttp | D21 residue | Approved both | 2026-11-21 |
+| A24 | Phase 4 authorization | — | **Authorized** | 2026-11-21 |
+
+**Recorded:** the decisions above were given by the owner in session on 2026-11-21 and are recorded as
+signed approvals in `risks-and-decisions.md` §6.
 
 **Not decided here:** A1 (Phase 0 reconciliation) and A10 (exact-only UPC/EAN, Phase 5).

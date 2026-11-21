@@ -14,12 +14,13 @@ This file is for any coding agent (OpenCode, Claude Code, Codex, or similar) tha
 **Phase 3 (Android camera and barcode scanning) is complete** as of 2026-11-21. Evidence and closure:
 `docs/phase-3/`. The app scans real labels on the POCO X3, and three instrumented tests pass on it.
 
-**Phase 4 (scan protocol and acknowledgment) is not authorized.** A12 was approved 2026-11-21, so the
-phase is unblocked on decisions and waits only on its own authorization.
+**Phase 4 (scan protocol and acknowledgment) is authorized as of 2026-11-21 (A24) and has not started.**
+Its scope is fixed by `docs/planning/approval-packet-phase-4.md`: `ScanClient` with pin-only TLS and one
+in-flight retry, `ContextClient`, event identity, the desktop `POST /v1/scans` and `GET /v1/context`,
+the in-memory dedupe table, shared contract fixtures, and status rendering. It stops at a fake dispatcher.
 
-**Not authorized:** any network call or pairing client, `POST /v1/scans`, `GET /v1/context`,
-`CheckoutService.resolve_barcode()`, any `CheckoutView` change, and any change to the sibling RawPOS
-repository.
+**Not authorized:** `CheckoutService.resolve_barcode()`, any `CheckoutView` change, admission rules, and
+any dispatch into the cart — all Phase 5. Do not modify the sibling RawPOS repository in this phase.
 
 **Do not:**
 - modify the sibling RawPOS repository (`..\RawPOS`);
