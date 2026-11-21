@@ -156,6 +156,22 @@ class ScanClientTest {
     }
 
     @Test
+    fun notReadyStopsImmediatelyWithItsOwnError() = runTest {
+        val transport = ScriptedTransport(
+            status(
+                503,
+                """{"v":1,"status":"rejected_unavailable","error":"service_unavailable",""" +
+                    """"message_code":"mobile.scan.not_ready"}""",
+            ),
+        )
+
+        val delivery = client(transport).submit(event, "ctx")
+
+        assertEquals(DeliveryError.NOT_READY, (delivery as Delivery.Failed).error)
+        assertEquals(1, transport.requests.size)
+    }
+
+    @Test
     fun contextIsFetched() = runTest {
         val transport = ScriptedTransport(
             ok("""{"v":1,"checkout_active":true,"context":"ctx","server_instance_id":"i1"}"""),

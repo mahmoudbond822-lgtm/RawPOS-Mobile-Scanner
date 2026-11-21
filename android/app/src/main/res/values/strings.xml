@@ -56,6 +56,7 @@
     <string name="scanner_send_uncertain">Delivery uncertain — check the desktop</string>
     <string name="scanner_send_expired">Scan expired — scan again</string>
     <string name="scanner_send_unauthorized">Not paired — re-pair the phone</string>
+    <string name="scanner_send_not_ready">Desktop is not ready to receive scans yet</string>
     <string name="scanner_send_refused">The desktop refused this scan</string>
     <string name="scanner_pair_start">Pair a desktop</string>
     <string name="scanner_pair_cancel">Cancel pairing</string>

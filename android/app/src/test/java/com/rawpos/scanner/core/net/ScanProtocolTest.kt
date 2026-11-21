@@ -59,8 +59,19 @@ class ScanProtocolTest {
     }
 
     @Test
-    fun unknownFixtureAsksForARetry() {
-        val parsed = ScanProtocol.parse(202, fixture("scan.unknown.response.json"))
+    fun notReadyIsItsOwnReasonRatherThanUncertainty() {
+        val parsed = ScanProtocol.parse(
+            503,
+            """{"v":1,"status":"rejected_unavailable","error":"service_unavailable",""" +
+                """"message_code":"mobile.scan.not_ready"}""",
+        )
+
+        assertEquals(Reaction.NOT_READY, parsed.reaction)
+        assertEquals("mobile.scan.not_ready", parsed.messageCode)
+    }
+
+    @Test
+    fun unknownFixtureAsksForARetry() {        val parsed = ScanProtocol.parse(202, fixture("scan.unknown.response.json"))
 
         assertEquals(Reaction.RETRY, parsed.reaction)
         assertNull(parsed.delivery)

@@ -10,6 +10,9 @@ enum class DeliveryError {
     /** An attempt never reached the desktop, and the budget is spent. Rescan. */
     EXPIRED,
 
+    /** The desktop answered but has no till wired up yet; nothing was dispatched. */
+    NOT_READY,
+
     /** The token is missing, invalid, or revoked. Re-pair. */
     UNAUTHORIZED,
 

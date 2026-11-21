@@ -256,13 +256,16 @@ fun ScannerScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 val statusLine = when {
-                    state.pairing == PairingStatus.PAIRED ->
+                    state.pairing == PairingStatus.PAIRED && state.submission == SubmissionStatus.IDLE ->
                         stringResource(
                             R.string.scanner_pair_paired,
                             state.pairedDesktop ?: "",
                         )
 
-                    state.pairing != PairingStatus.OFF -> stringResource(pairingText(state))
+                    state.pairing == PairingStatus.WAITING_FOR_CODE ||
+                        state.pairing == PairingStatus.PAIRING ||
+                        state.pairing == PairingStatus.FAILED ->
+                        stringResource(pairingText(state))
 
                     else -> stringResource(submissionText(state))
                 }
@@ -301,11 +304,13 @@ fun ScannerScreen(
                         color = MaterialTheme.colorScheme.error,
                     )
                 }
-                Text(
-                    text = stringResource(R.string.scanner_offline_note),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                if (state.submission == SubmissionStatus.LOCAL_ONLY) {
+                    Text(
+                        text = stringResource(R.string.scanner_offline_note),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }
     }
@@ -495,6 +500,7 @@ private fun submissionText(state: ScannerUiState): Int = when (state.submission)
         "UNCERTAIN" -> R.string.scanner_send_uncertain
         "EXPIRED" -> R.string.scanner_send_expired
         "UNAUTHORIZED" -> R.string.scanner_send_unauthorized
+        "NOT_READY" -> R.string.scanner_send_not_ready
         else -> R.string.scanner_send_refused
     }
 }

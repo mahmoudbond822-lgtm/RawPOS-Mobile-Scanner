@@ -42,7 +42,9 @@ class ScanClient(
                         body = ScanProtocol.requestBody(event, endpoint.deviceId, context),
                     ),
                 )
-            } catch (_: Exception) {
+            } catch (error: Exception) {
+                // Diagnostics only: the exception class, never the payload or the barcode.
+                android.util.Log.w("RawPosScan", "attempt failed: ${error.javaClass.simpleName}", error)
                 null
             }
 
@@ -67,6 +69,11 @@ class ScanClient(
 
                     Reaction.UNAUTHORIZED -> return Delivery.Failed(
                         DeliveryError.UNAUTHORIZED,
+                        lastMessage,
+                    )
+
+                    Reaction.NOT_READY -> return Delivery.Failed(
+                        DeliveryError.NOT_READY,
                         lastMessage,
                     )
 
@@ -102,7 +109,8 @@ class ScanClient(
             ),
         )
         if (response.status == 200) ScanProtocol.parseContext(response.body) else null
-    } catch (_: Exception) {
+    } catch (error: Exception) {
+        android.util.Log.w("RawPosScan", "context fetch failed: ${error.javaClass.simpleName}", error)
         null
     }
 

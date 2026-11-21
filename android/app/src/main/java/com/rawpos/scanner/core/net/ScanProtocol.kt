@@ -13,6 +13,9 @@ internal enum class Reaction {
     /** The token is not usable; re-pair. */
     UNAUTHORIZED,
 
+    /** The desktop is running but has no till wired up; nothing was dispatched and retrying will not help. */
+    NOT_READY,
+
     /** The desktop refused this body; retrying it is wrong. */
     REFUSED,
 }
@@ -58,6 +61,9 @@ object ScanProtocol {
 
         if (status == 401 || status == 403) {
             return ParsedResponse(Reaction.UNAUTHORIZED, null, instance, messageCode)
+        }
+        if (status == 503 && messageCode == "mobile.scan.not_ready") {
+            return ParsedResponse(Reaction.NOT_READY, null, instance, messageCode)
         }
         if (status == 409) {
             return ParsedResponse(Reaction.REFUSED, null, instance, messageCode)
