@@ -149,7 +149,8 @@ fun ScannerScreen(
                     paused = state.status == ScannerStatus.PAUSED,
                     torchOn = state.torchOn,
                     zoomOn = state.zoomOn,
-                    pairingMode = state.pairing != PairingStatus.OFF,
+                    pairingMode = state.pairing == PairingStatus.WAITING_FOR_CODE ||
+                        state.pairing == PairingStatus.PAIRING,
                     onFrame = onFrame,
                     onCameraStarted = onCameraStarted,
                 )
@@ -354,18 +355,19 @@ private fun CameraPreview(
     val currentPaused by rememberUpdatedState(paused)
     val currentOnStarted by rememberUpdatedState(onCameraStarted)
     var camera by remember { mutableStateOf<Camera?>(null) }
-    val executor = remember { Executors.newSingleThreadExecutor() }
-    val scanner = remember(pairingMode) {
-        BarcodeScanning.getClient(
+
+    DisposableEffect(lifecycleOwner, pairingMode) {
+        // Both the executor and the ML Kit client belong to this binding. Creating them outside the
+        // effect meant a mode change shut the executor down and handed a dead one to the new analyzer,
+        // so frames were never decoded after switching to pairing mode.
+        val executor = Executors.newSingleThreadExecutor()
+        val scanner = BarcodeScanning.getClient(
             if (pairingMode) {
                 BarcodeAnalyzer.pairingOptions()
             } else {
                 BarcodeAnalyzer.scannerOptions()
             },
         )
-    }
-
-    DisposableEffect(lifecycleOwner, pairingMode) {
         val future = ProcessCameraProvider.getInstance(context)
         var provider: ProcessCameraProvider? = null
         val bind = Runnable {
@@ -401,6 +403,7 @@ private fun CameraPreview(
 
         onDispose {
             provider?.unbindAll()
+            camera = null
             executor.shutdown()
             scanner.close()
         }

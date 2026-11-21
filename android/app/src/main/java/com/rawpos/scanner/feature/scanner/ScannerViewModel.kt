@@ -99,8 +99,10 @@ class ScannerViewModel(
         _state.update { it.copy(status = ScannerStatus.SCANNING) }
     }
 
-    /** True when the analyzer must decode QR instead of product formats. */
-    fun isPairingMode(): Boolean = _state.value.pairing != PairingStatus.OFF
+    /** True only while the pairing QR is being sought; once paired, product scanning resumes. */
+    fun isPairingMode(): Boolean =
+        _state.value.pairing == PairingStatus.WAITING_FOR_CODE ||
+            _state.value.pairing == PairingStatus.PAIRING
 
     fun startPairing() {
         if (pairingClient == null) {
