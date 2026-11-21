@@ -252,6 +252,15 @@ fun ScannerScreen(
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                Text(
+                    text = stringResource(submissionText(state)),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = when (state.submission) {
+                        SubmissionStatus.FAILED -> MaterialTheme.colorScheme.error
+                        SubmissionStatus.DECIDED -> MaterialTheme.colorScheme.primary
+                        else -> MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                )
                 val rejection = state.rejection
                 if (rejection != null) {
                     Text(
@@ -415,6 +424,27 @@ private fun statusKind(state: ScannerUiState): StatusKind = when {
     state.status == ScannerStatus.SENT -> StatusKind.SUCCESS
     state.status == ScannerStatus.PAUSED -> StatusKind.INFO
     else -> StatusKind.NEUTRAL
+}
+
+@StringRes
+private fun submissionText(state: ScannerUiState): Int = when (state.submission) {
+    SubmissionStatus.LOCAL_ONLY -> R.string.scanner_send_local
+    SubmissionStatus.IDLE -> R.string.scanner_send_ready
+    SubmissionStatus.WAITING -> R.string.scanner_send_waiting
+    SubmissionStatus.DECIDED -> when (state.decidedStatus) {
+        "added" -> R.string.scanner_send_added
+        "merged" -> R.string.scanner_send_merged
+        "not_found" -> R.string.scanner_send_not_found
+        "inactive" -> R.string.scanner_send_inactive
+        "duplicate" -> R.string.scanner_send_duplicate
+        else -> R.string.scanner_send_refused
+    }
+    SubmissionStatus.FAILED -> when (state.failure) {
+        "UNCERTAIN" -> R.string.scanner_send_uncertain
+        "EXPIRED" -> R.string.scanner_send_expired
+        "UNAUTHORIZED" -> R.string.scanner_send_unauthorized
+        else -> R.string.scanner_send_refused
+    }
 }
 
 @StringRes

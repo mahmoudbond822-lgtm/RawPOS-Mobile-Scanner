@@ -9,6 +9,7 @@ composeBom = "2026.04.01"
 coroutines = "1.10.2"
 cameraX = "1.6.2"
 mlkitBarcode = "17.3.0"
+okhttp = "4.12.0"
 orgJson = "20240303"
 junit = "4.13.2"
 androidxJunit = "1.2.1"
@@ -27,6 +28,7 @@ androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", 
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraX" }
 androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraX" }
 mlkit-barcode-scanning = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "mlkitBarcode" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 compose-ui = { group = "androidx.compose.ui", name = "ui" }

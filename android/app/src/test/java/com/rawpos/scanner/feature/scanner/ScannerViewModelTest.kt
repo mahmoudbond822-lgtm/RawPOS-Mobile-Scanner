@@ -4,7 +4,11 @@ import com.rawpos.scanner.core.barcode.BarcodeFormat
 import com.rawpos.scanner.core.barcode.DecodedBarcode
 import com.rawpos.scanner.core.barcode.RejectionReason
 import com.rawpos.scanner.core.barcode.ScanGate
+import com.rawpos.scanner.core.net.Delivery
+import com.rawpos.scanner.core.net.DeliveryError
 import com.rawpos.scanner.core.transport.FakeTransport
+import com.rawpos.scanner.core.transport.ScanTransport
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -52,29 +56,80 @@ class ScannerViewModelTest {
     }
 
     @Test
-    fun `without a transport the scan still shows on screen`() = runTest(dispatcher) {
+    fun `without a transport the scan stays local`() = runTest(dispatcher) {
         val viewModel = ScannerViewModel(transport = null)
 
         viewModel.onFrame(frame("123456"), 0L)
         viewModel.onFrame(frame("123456"), 100L)
 
         assertEquals("123456", viewModel.state.value.lastCode)
-        assertEquals(ScannerStatus.SENT, viewModel.state.value.status)
+        assertEquals(SubmissionStatus.LOCAL_ONLY, viewModel.state.value.submission)
     }
 
     @Test
-    fun `a non-numeric payload is rejected and never emitted`() = runTest(dispatcher) {
+    fun `a decided scan shows the desktop status`() = runTest(dispatcher) {
+        val transport = FakeTransport()
+        transport.replyWith(Delivery.Decided(status = "merged", context = "c"))
+        val viewModel = ScannerViewModel(transport = transport)
+
+        viewModel.onFrame(frame("123456"), 0L)
+        viewModel.onFrame(frame("123456"), 100L)
+        advanceUntilIdle()
+
+        assertEquals(SubmissionStatus.DECIDED, viewModel.state.value.submission)
+        assertEquals("merged", viewModel.state.value.decidedStatus)
+        assertNull(viewModel.state.value.failure)
+    }
+
+    @Test
+    fun `an uncertain delivery is reported as a failure, not success`() = runTest(dispatcher) {
+        val transport = FakeTransport()
+        transport.fail(DeliveryError.UNCERTAIN)
+        val viewModel = ScannerViewModel(transport = transport)
+
+        viewModel.onFrame(frame("123456"), 0L)
+        viewModel.onFrame(frame("123456"), 100L)
+        advanceUntilIdle()
+
+        assertEquals(SubmissionStatus.FAILED, viewModel.state.value.submission)
+        assertEquals("UNCERTAIN", viewModel.state.value.failure)
+        assertNull(viewModel.state.value.decidedStatus)
+    }
+
+    @Test
+    fun `a second scan is dropped while one is in flight`() = runTest(dispatcher) {
+        val hanging = object : ScanTransport {
+            val release = CompletableDeferred<Unit>()
+            var calls = 0
+            override suspend fun submit(barcode: String, format: String): Delivery {
+                calls += 1
+                release.await()
+                return Delivery.Decided("added", null)
+            }
+        }
+        val viewModel = ScannerViewModel(transport = hanging)
+
+        viewModel.onFrame(frame("111"), 0L)
+        viewModel.onFrame(frame("111"), 100L)
+        assertEquals(SubmissionStatus.WAITING, viewModel.state.value.submission)
+
+        viewModel.onFrame(frame("222"), 200L)
+        viewModel.onFrame(frame("222"), 300L)
+        advanceUntilIdle()
+        assertEquals(1, hanging.calls)
+
+        hanging.release.complete(Unit)
+        advanceUntilIdle()
+        assertEquals(SubmissionStatus.DECIDED, viewModel.state.value.submission)
+    }
+
+    @Test
+    fun `a non-numeric payload is rejected and never submitted`() = runTest(dispatcher) {
         val transport = FakeTransport()
         val viewModel = ScannerViewModel(transport = transport)
 
-        viewModel.onFrame(
-            frame("ABC-123", format = BarcodeFormat.CODE_128),
-            0L,
-        )
-        viewModel.onFrame(
-            frame("ABC-123", format = BarcodeFormat.CODE_128),
-            100L,
-        )
+        viewModel.onFrame(frame("ABC-123", format = BarcodeFormat.CODE_128), 0L)
+        viewModel.onFrame(frame("ABC-123", format = BarcodeFormat.CODE_128), 100L)
         advanceUntilIdle()
 
         assertNull(viewModel.state.value.lastCode)
@@ -119,18 +174,17 @@ class ScannerViewModelTest {
         advanceUntilIdle()
 
         assertEquals(listOf("123456"), transport.submitted)
-        assertEquals(ScannerStatus.SENT, viewModel.state.value.status)
     }
 
     @Test
-    fun `torch state is exposed to the screen`() = runTest(dispatcher) {
+    fun `torch and zoom are exposed to the screen`() = runTest(dispatcher) {
         val viewModel = ScannerViewModel()
 
         viewModel.setTorch(true)
         assertTrue(viewModel.state.value.torchOn)
 
-        viewModel.setTorch(false)
-        assertEquals(false, viewModel.state.value.torchOn)
+        viewModel.toggleZoom()
+        assertTrue(viewModel.state.value.zoomOn)
     }
 
     @Test
@@ -140,5 +194,12 @@ class ScannerViewModelTest {
         viewModel.onCameraStarted()
 
         assertEquals(ScannerStatus.SCANNING, viewModel.state.value.status)
+    }
+
+    @Test
+    fun `the wire format matches the protocol names`() {
+        assertEquals("ean_13", BarcodeFormat.EAN_13.wireName())
+        assertEquals("code_128", BarcodeFormat.CODE_128.wireName())
+        assertEquals("unknown", BarcodeFormat.UNKNOWN.wireName())
     }
 }

@@ -2,8 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Phase 3 adds the camera. There is still no INTERNET permission: no network in this phase. -->
+    <!-- Phase 3 adds the camera. Phase 4 adds the LAN client (A23). There is still no cloud use. -->
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <uses-feature
         android:name="android.hardware.camera.any"

@@ -184,6 +184,63 @@ a comment saying so. Lint is back to 19 warnings, all version notices.
 
 ---
 
+## Increment 3b — transport, credentials, and submission
+
+### What was added
+
+| File | Purpose |
+|---|---|
+| `core/net/OkHttpTransport.kt` | OkHttp with the pin as the only trust anchor |
+| `core/net/Credentials.kt` | Credentials, `CredentialCodec`, Keystore-backed `CredentialStore` |
+| `core/net/ClientScanTransportHolder.kt` | The single place that can build a desktop transport |
+| `core/transport/ScanTransport.kt` | Now returns `Delivery`; `ClientScanTransport` owns sequence and context |
+| `ScannerViewModel` | Submission states, one in flight, no optimistic success |
+| `ScannerScreen` | Renders the desktop's decision, or why there was none |
+| Manifest | `INTERNET` permission (A23) |
+
+### Choices worth recording
+
+- **OkHttp 4.12.0, not 5.5.1.** OkHttp 5 requires `compileSdk 37`; A13 fixed compile/target at 36, and
+  D21 says target 37 adds `ACCESS_LOCAL_NETWORK`. The SDK pin won. 4.12.0 is stable and sufficient.
+- **`retryOnConnectionFailure(false)`.** OkHttp's silent retry would break the event-identity guarantee
+  the client exists to provide.
+- **No redirects, no cookies, no proxy auth.** One host, one pin, nothing else.
+- **Keystore AES-GCM, backup disabled.** A lost key means "not paired", never a silent fallback.
+
+### Behaviour
+
+`SubmissionStatus` is `LOCAL_ONLY` without credentials — identical to Phase 3 — and
+`IDLE → WAITING → DECIDED | FAILED` with them. While `WAITING`, a new emit is dropped rather than
+queued (D15), and the screen shows `added`/`merged`/`not_found` only when the desktop said so (D13).
+
+### Gates
+
+| Gate | Result |
+|---|---|
+| `assembleDebug` | BUILD SUCCESSFUL |
+| `testDebugUnitTest` | **92 tests**, 0 failed (10 new) |
+| `lintDebug` | 0 errors, 20 warnings (version notices only) |
+
+**Bug found and fixed by the tests:** the first version initialised the submission state to `WAITING`,
+so every scan was dropped as "one already in flight". Four view-model tests failed; the state now starts
+`IDLE`.
+
+### The gap this exposed
+
+**There is no Android pairing client.** Phase 4's scope never included one, and the desktop's `/v1/pair`
+has no caller on the phone. Consequences:
+
+- no credentials can exist on the device, so `ClientScanTransportHolder` always returns `null`;
+- the scanner therefore still behaves exactly as Phase 3;
+- `INTERNET` is now declared but unreachable — a capability with no code path to use it;
+- the phase's end-to-end acceptance cannot be demonstrated on hardware without it.
+
+Pairing also needs a QR scan mode, because the analyzer deliberately restricts ML Kit to product
+formats (QR is pairing-only per D14). This is a scope decision, not a defect: it must be approved, not
+assumed.
+
+---
+
 ## Open items
 
 1. **Desktop route tests** — consume the same fixtures, including `POST /v1/scans` and `GET /v1/context`

@@ -45,6 +45,18 @@
     <string name="scanner_reject_disabled">This barcode format is disabled</string>
     <string name="scanner_reject_empty">Nothing was read</string>
     <string name="scanner_offline_note">No desktop is connected yet. Scans stay on this screen.</string>
+    <string name="scanner_send_local">No desktop paired</string>
+    <string name="scanner_send_ready">Ready to send</string>
+    <string name="scanner_send_waiting">Waiting for desktop</string>
+    <string name="scanner_send_added">Added to the cart</string>
+    <string name="scanner_send_merged">Added — merged into the existing line</string>
+    <string name="scanner_send_not_found">Barcode not found</string>
+    <string name="scanner_send_inactive">Product is inactive</string>
+    <string name="scanner_send_duplicate">Already sent</string>
+    <string name="scanner_send_uncertain">Delivery uncertain — check the desktop</string>
+    <string name="scanner_send_expired">Scan expired — scan again</string>
+    <string name="scanner_send_unauthorized">Not paired — re-pair the phone</string>
+    <string name="scanner_send_refused">The desktop refused this scan</string>
 
     <string name="settings_appearance">Appearance</string>
     <string name="settings_language">Language</string>

@@ -2,22 +2,28 @@ package com.rawpos.scanner.core
 
 import android.content.Context
 import androidx.lifecycle.ViewModelProvider
+import com.rawpos.scanner.core.net.ClientScanTransportHolder
+import com.rawpos.scanner.core.net.CredentialStore
+import com.rawpos.scanner.core.net.KeystoreCredentialStore
 import com.rawpos.scanner.core.settings.AndroidSettingsRepository
 import com.rawpos.scanner.core.settings.SettingsRepository
+import com.rawpos.scanner.core.transport.ScanTransport
 import com.rawpos.scanner.core.viewmodel.AppViewModelFactory
 
 /**
- * Manual composition root for Phase 1.
+ * Manual composition root.
  *
- * The graph is deliberately small: one settings repository, one immutable AppInfo, and a
- * ViewModel factory. Hilt is not justified at this size; constructor injection keeps the
- * graph visible and testable.
+ * The graph stays small and visible: settings, app info, the credential store, and — only when a
+ * desktop has been paired — the scan transport. With no credentials the scanner runs exactly as it did
+ * in Phase 3: local only, nothing leaves the phone.
  */
 class AppContainer(context: Context) {
     private val appContext = context.applicationContext
 
     val settingsRepository: SettingsRepository = AndroidSettingsRepository(appContext)
     val appInfo: AppInfo = AppInfo.from(appContext)
+    val credentialStore: CredentialStore = KeystoreCredentialStore(appContext)
+    val scanTransport: ScanTransport? = ClientScanTransportHolder.from(credentialStore.load())
     val viewModelFactory: ViewModelProvider.Factory =
-        AppViewModelFactory(settingsRepository, appInfo)
+        AppViewModelFactory(settingsRepository, appInfo, scanTransport)
 }

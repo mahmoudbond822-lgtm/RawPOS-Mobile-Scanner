@@ -47,6 +47,18 @@
     <string name="scanner_reject_disabled">صيغة الباركود هذه غير مفعّلة</string>
     <string name="scanner_reject_empty">لم تتم قراءة أي شيء</string>
     <string name="scanner_offline_note">لا يوجد جهاز متصل بعد. تبقى عمليات المسح على هذه الشاشة.</string>
+    <string name="scanner_send_local">لا يوجد جهاز مربوط</string>
+    <string name="scanner_send_ready">جاهز للإرسال</string>
+    <string name="scanner_send_waiting">في انتظار جهاز الكاشير</string>
+    <string name="scanner_send_added">تمت الإضافة إلى السلة</string>
+    <string name="scanner_send_merged">تمت الإضافة — دُمج مع السطر الحالي</string>
+    <string name="scanner_send_not_found">الباركود غير موجود</string>
+    <string name="scanner_send_inactive">المنتج غير مفعّل</string>
+    <string name="scanner_send_duplicate">أُرسل مسبقًا</string>
+    <string name="scanner_send_uncertain">التسليم غير مؤكد — تحقق من الجهاز</string>
+    <string name="scanner_send_expired">انتهت صلاحية المسح — أعد المسح</string>
+    <string name="scanner_send_unauthorized">غير مربوط — أعد ربط الهاتف</string>
+    <string name="scanner_send_refused">رفض الجهاز هذا المسح</string>
 
     <string name="settings_appearance">المظهر</string>
     <string name="settings_language">اللغة</string>
