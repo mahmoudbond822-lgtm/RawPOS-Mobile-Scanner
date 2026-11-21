@@ -2,7 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Phase 1 deliberately declares no permissions: no camera, no network. -->
+    <!-- Phase 3 adds the camera. There is still no INTERNET permission: no network in this phase. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-feature
+        android:name="android.hardware.camera.any"
+        android:required="true" />
+
     <application
         android:name=".RawPosScannerApplication"
         android:allowBackup="false"

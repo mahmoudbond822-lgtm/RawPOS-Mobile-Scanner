@@ -26,16 +26,25 @@
     <string name="connection_status_phase1">غير متصل — الربط غير مفعّل في المرحلة 1</string>
 
     <string name="scanner_title">الماسح</string>
-    <string name="scanner_status_phase1">أساس فقط — الكاميرا غير مفعّلة</string>
-    <string name="scanner_viewfinder_placeholder">معاينة الكاميرا — المرحلة 3</string>
     <string name="scanner_target_hint">وجّه الكاميرا إلى الباركود</string>
     <string name="scanner_last_code_label">آخر باركود</string>
     <string name="scanner_last_code_empty">لا يوجد مسح بعد</string>
-    <string name="scanner_status_idle">في الانتظار</string>
+    <string name="scanner_status_ready">جاهز</string>
+    <string name="scanner_status_paused">متوقف مؤقتًا</string>
+    <string name="scanner_status_sent">تم المسح</string>
+    <string name="scanner_status_multiple">ضع باركودًا واحدًا في الإطار</string>
     <string name="scanner_torch">المصباح</string>
+    <string name="scanner_torch_on">المصباح مفعّل</string>
     <string name="scanner_pause">إيقاف مؤقت</string>
-    <string name="scanner_zoom">تكبير 1×</string>
-    <string name="scanner_phase1_note">تأتي CameraX وML Kit ومسح الباركود في المرحلة 3. لا يُطلب إذن الكاميرا في هذه المرحلة.</string>
+    <string name="scanner_resume">متابعة</string>
+    <string name="scanner_permission_title">إذن الكاميرا مطلوب</string>
+    <string name="scanner_permission_body">تُستخدم الكاميرا أثناء فتح هذه الشاشة فقط، ولا يخرج أي شيء من الهاتف.</string>
+    <string name="scanner_permission_action">السماح بالكاميرا</string>
+    <string name="scanner_reject_non_digits">يُدعم الباركود الرقمي فقط</string>
+    <string name="scanner_reject_too_long">الباركود طويل جدًا</string>
+    <string name="scanner_reject_disabled">صيغة الباركود هذه غير مفعّلة</string>
+    <string name="scanner_reject_empty">لم تتم قراءة أي شيء</string>
+    <string name="scanner_offline_note">لا يوجد جهاز متصل بعد. تبقى عمليات المسح على هذه الشاشة.</string>
 
     <string name="settings_appearance">المظهر</string>
     <string name="settings_language">اللغة</string>

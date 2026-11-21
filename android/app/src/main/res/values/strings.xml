@@ -24,16 +24,25 @@
     <string name="connection_status_phase1">Not connected — pairing is disabled in Phase 1</string>
 
     <string name="scanner_title">Scanner</string>
-    <string name="scanner_status_phase1">Foundation only — camera disabled</string>
-    <string name="scanner_viewfinder_placeholder">Camera preview — Phase 3</string>
     <string name="scanner_target_hint">Point at a barcode</string>
     <string name="scanner_last_code_label">Last barcode</string>
     <string name="scanner_last_code_empty">No scan yet</string>
-    <string name="scanner_status_idle">Waiting</string>
+    <string name="scanner_status_ready">Ready</string>
+    <string name="scanner_status_paused">Paused</string>
+    <string name="scanner_status_sent">Scanned</string>
+    <string name="scanner_status_multiple">Frame one barcode</string>
     <string name="scanner_torch">Torch</string>
+    <string name="scanner_torch_on">Torch on</string>
     <string name="scanner_pause">Pause</string>
-    <string name="scanner_zoom">Zoom 1×</string>
-    <string name="scanner_phase1_note">CameraX, ML Kit, and barcode scanning arrive in Phase 3. No camera permission is requested in this phase.</string>
+    <string name="scanner_resume">Resume</string>
+    <string name="scanner_permission_title">Camera permission needed</string>
+    <string name="scanner_permission_body">The camera is used only while this screen is open. Nothing leaves the phone.</string>
+    <string name="scanner_permission_action">Allow camera</string>
+    <string name="scanner_reject_non_digits">Only numeric product barcodes are supported</string>
+    <string name="scanner_reject_too_long">Barcode too long</string>
+    <string name="scanner_reject_disabled">This barcode format is disabled</string>
+    <string name="scanner_reject_empty">Nothing was read</string>
+    <string name="scanner_offline_note">No desktop is connected yet. Scans stay on this screen.</string>
 
     <string name="settings_appearance">Appearance</string>
     <string name="settings_language">Language</string>

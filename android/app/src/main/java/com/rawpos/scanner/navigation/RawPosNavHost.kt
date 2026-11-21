@@ -104,7 +104,13 @@ fun RawPosNavHost(
             composable(RawPosDestination.SCANNER.route) {
                 val viewModel: ScannerViewModel = viewModel(factory = container.viewModelFactory)
                 val state by viewModel.state.collectAsStateWithLifecycle()
-                ScannerScreen(state = state)
+                ScannerScreen(
+                    state = state,
+                    onFrame = viewModel::onFrame,
+                    onTogglePause = viewModel::togglePause,
+                    onTorchChanged = viewModel::setTorch,
+                    onCameraStarted = viewModel::onCameraStarted,
+                )
             }
 
             composable(RawPosDestination.SETTINGS.route) {
