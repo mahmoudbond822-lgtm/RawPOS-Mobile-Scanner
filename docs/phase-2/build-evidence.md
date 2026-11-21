@@ -219,16 +219,104 @@ leaves behind. On Windows the `0600` mode is advisory and the protection is the 
 
 ---
 
+## Increment 4 — the listener, with bounded threads
+
+### What was added or changed
+
+| File | Change |
+|---|---|
+| `src/rawpos/mobile/server.py` | New: TLS listener, exact routes, bounded concurrency, per-IP rate limiter, pair flow |
+| `src/rawpos/mobile/pairing.py` | `wait_for_decision`, `replace_allowed`, and a condition variable so the request can block on the cashier's decision |
+| `src/rawpos/mobile/devices.py` | Optional `RegistryCodec`, so the registry can be opaque at rest |
+| `src/rawpos/mobile/tls.py` | `DpapiCodec` / `PlainCodec` for that seam |
+| `tests/integration/test_mobile_server.py` | New: 15 tests, all over a real TLS connection |
+
+This is the first code in RawPOS that opens a socket — and only inside `start()`, which no caller
+invokes yet. The receiver is inert in the application; the dialog and wiring are increment 5.
+
+### Route table
+
+| Method | Path | Behaviour |
+|---|---|---|
+| `GET` | `/v1/health` | 200 with `v`, `status`, `receiver`, `server_instance_id`, `server_time` only |
+| `POST` | `/v1/pair` | 200 token, 202 waiting, 403 denied, 410 expired, 429 limited |
+| anything else | — | 404 `not_found`; wrong method → 405 |
+
+### Bounds, and how each is proven
+
+| Bound | Value | Test |
+|---|---|---|
+| Body | 2 KiB | oversize → 413 `too_large` |
+| Header block / fields | 16 KiB / 50 | enforced in `_enforce_header_limits` |
+| Concurrency | 16 total, 4 per IP | `_ConnectionGate`, try-acquire (no unbounded thread spawn) |
+| Requests per IP | 30/min | third request with a limit of 2 → 429 |
+| TLS handshake | 3 s | socket timeout before `wrap_socket` |
+| Request read | 5 s | socket timeout after handshake |
+
+`ThreadingHTTPServer`'s unbounded thread-per-connection is **not** used; `process_request` refuses a
+connection when the gate is full instead of spawning a thread that waits.
+
+### The no-network guarantee, re-checked now that a listener exists
+
+```
+py -3 -m pytest tests/integration/test_no_network.py tests/failure/test_no_network.py -q
+```
+Still green, and the full suite passes with the listener module present. A new test pins the stronger
+property at the object level:
+
+- `test_constructing_the_receiver_opens_no_socket` — monkeypatches `socket.socket`, builds a
+  `MobileReceiver`, and asserts **zero** sockets were created and `running is False`.
+
+That closes the open item from increment 1: "no socket exists while the receiver is disabled" is now a
+tested claim rather than an intention. Whether the *application* auto-starts it remains increment 5's
+responsibility, and will be tested there.
+
+### Pairing flow across the wire
+
+`submit` → `wait_for_decision(60 s)` → issue token → `finish`. Verified end to end:
+
+1. Approved → 200 with a `rps1_` token, the device registered, and the token authenticating against
+   the registry.
+2. Denied → 403 `pairing_denied`, registry unchanged.
+3. No window → 410 `pairing_expired`.
+4. Undecided after the wait → 202 `{"state": "waiting"}`, which the phone retries with the same body.
+
+### Known limitation, recorded
+
+When a device is already paired and the window was not opened with "Replace current device", the
+registry raises `DeviceAlreadyPaired`. The current mapping is `409 pairing_used`, which is
+**semantically imprecise**. It is unreachable through the dialog (which owns that choice), and it is
+listed as an open item for Phase 4, where the contract fixtures must give it its own typed code. This
+was deliberately not invented here, because adding a protocol error code is an Article XV change.
+
+### Gates after the change
+
+| Gate | Command | Result |
+|---|---|---|
+| Lint | `py -3 -m ruff check .` | `All checks passed!` |
+| Types | `py -3 -m mypy src` | `Success: no issues found in 155 source files` |
+| Money-path guard | `py -3 scripts/check_no_float.py` | `no-float gate: PASS` |
+| Full suite | `py -3 -m pytest -q` | **1574 passed in 95.12s** |
+
+1574 = 1450 existing + 57 + 24 + 17 + 2 + 15 + 9 seam tests.
+
+---
+
 ## Open items in this phase
 
-1. **Socket-absence guard test** — to be added with `server.py` (increment 4).
-2. **Android SAS vector** — the derivation from increment 2 must be reproduced by the Android client
+1. **Android SAS vector** — the derivation from increment 2 must be reproduced by the Android client
    and checked against the pinned vector before Phase 4 contract tests.
-3. **Android pin verification** — the client must compute the same SPKI pin and fail closed on mismatch.
-4. **Per-IP rate limiting** — absent until `server.py` (increment 4).
-5. **`waitress` decision** — pre-approved as the Phase 7 remedy if fuzzing fails; not adopted now.
-6. **Temporary key file** — inherent to Python's TLS API; documented in `tls.py` and above.
+2. **Android pin verification** — the client must compute the same SPKI pin and fail closed on mismatch.
+3. **`device_already_paired`** — needs its own typed code in Phase 4 contract fixtures; currently mapped
+   to `409 pairing_used`, which is imprecise but unreachable through the dialog.
+4. **Dialog and application wiring** (increment 5) — the receiver is inert; nothing calls `start()`,
+   and the owner-only gate (A14) lives there.
+5. **Codec selection** — the caller must construct the registry with `DpapiCodec` when the identity mode
+   is DPAPI and `PlainCodec` when it is the ACL fallback. Increment 5 should make that pairing
+   automatic rather than a convention.
+6. **`waitress` decision** — pre-approved as the Phase 7 remedy if fuzzing fails; not adopted now.
+7. **Temporary key file** — inherent to Python's TLS API; documented in `tls.py` and above.
 
-Registry protection is no longer an open item: `tls.py` provides the DPAPI path, and `devices.py` will
-be wired to it in increment 4. Until that wiring exists the registry file is still stored as plain
-bytes and **must not ship** in this state.
+Registry protection is no longer missing: `DeviceRegistry` accepts a codec, and `tls.DpapiCodec`
+provides it. What remains is the wiring in item 5, so a plain registry file can still be created by a
+caller that forgets to pass a codec.
