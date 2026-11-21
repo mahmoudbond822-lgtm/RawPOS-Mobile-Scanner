@@ -1,0 +1,79 @@
+# Phase 3 — Build Evidence
+
+**Phase:** 3 — Android camera and barcode scanning (authorized 2026-11-21, A18).
+**Scope:** `implementation-roadmap.md` Phase 3. No network, no pairing client, no checkout.
+**Every result below was produced in this session on this machine.**
+
+---
+
+## Test device
+
+| Item | Value |
+|---|---|
+| Model | POCO X3 NFC (`M2007J20CG`) |
+| Android | 12 (API 31) |
+| Connection | USB, visible to Windows as `POCO X3 NFC` |
+| **adb status** | **not authorized yet** — `adb devices` lists nothing |
+
+Windows sees the phone but adb does not, which means USB debugging is off or the RSA prompt has not
+been accepted. This blocks only the instrumented camera work (increment 3+); the logic layer below is
+pure JVM and needs no device.
+
+---
+
+## Increment 1 — validation, gate, and transport seam
+
+### What was added
+
+| File | Purpose |
+|---|---|
+| `core/barcode/BarcodeFormat.kt` | Symbologies + the provisionally approved enabled set (D14/A11) |
+| `core/barcode/BarcodeValidator.kt` | The full predicate and its typed rejection reasons |
+| `core/barcode/ScanGate.kt` | Candidate stabilizer: stability, cooldown, latch, re-arm, one at a time |
+| `core/transport/ScanTransport.kt` | The seam Phase 4 will implement; no network here |
+| `core/transport/FakeTransport.kt` *(test)* | Records submissions so scanning is testable without a desktop |
+| `BarcodeValidatorTest.kt`, `ScanGateTest.kt`, `FakeTransportTest.kt` | 26 tests |
+
+No camera, ML Kit, or manifest permission was added. The app still declares **no permissions**.
+
+### Gates
+
+| Gate | Command | Result |
+|---|---|---|
+| Build | `.\gradlew.bat --no-daemon assembleDebug` | `BUILD SUCCESSFUL` |
+| Unit tests | `.\gradlew.bat --no-daemon testDebugUnitTest` | **36 tests**, 0 failed |
+| Lint | `.\gradlew.bat --no-daemon lintDebug` | 0 errors, 14 warnings (version notices, unchanged) |
+| Instrumented | `connectedDebugAndroidTest` | **not run** — device not authorized for adb |
+
+Test breakdown: `BarcodeValidatorTest` 11, `ScanGateTest` 13, `FakeTransportTest` 2, plus the 10 Phase 1
+tests. New tests: **26**.
+
+### Decisions recorded
+
+- **Parameters come from the spec, not from taste** (§6.1): 2 stability frames, 150 ms global minimum
+  interval, 500 ms re-arm absence. They are constructor parameters so Phase 6 can tune them with
+  measurements instead of edits.
+- **Time is a parameter**, never a hidden clock. Every gate rule is deterministic under test; no test
+  sleeps.
+- **`FakeTransport` lives in the test source set** so no fake can ship inside the APK.
+- **No check-digit rejection.** ML Kit validates the symbology checksum, and RawPOS treats barcodes as
+  opaque; adding a second opinion would create phone-only false negatives.
+- **The enabled set excludes QR**, which is enabled only in pairing mode.
+
+### Deliberate non-implementations
+
+- `event_id`, retries, and acknowledgment — Phase 4. The 10 s first-submission staleness rule needs the
+  capture timestamp, which only exists once events exist.
+- CameraX, ML Kit, permissions, and the scanner screen — the next increment. CameraX and ML Kit are
+  inside A18's scope and will be pinned in `libs.versions.toml` when added.
+- Any network call. `ScanTransport` has one method and no implementation in the main source set.
+
+---
+
+## Open items
+
+1. **Authorize adb on the phone** — enable Developer options → USB debugging and accept the RSA prompt,
+   so `connectedDebugAndroidTest` can run and the camera work can be proven on the device.
+2. **Camera increment** — CameraX + bundled ML Kit, permission flow, scanner screen, feedback.
+3. **Pre-pilot label capture** remains a blocking pilot gate (R13); no real shop data exists yet.
+4. **Arabic + English strings** for the scanner UI, added with the screen so both catalogs stay in sync.
