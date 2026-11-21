@@ -113,35 +113,53 @@ Phase 8 measurement.
 | `lintDebug` | 0 errors, 18 warnings — all version notices |
 | `connectedDebugAndroidTest` | **blocked at install**, see below |
 
-### Device: authorized, install blocked by MIUI
+### Device: POCO X3 NFC — instrumented tests pass
 
-`adb devices` now shows the phone as `device` (M2007J20CG, Android 12, `surya_global`). The instrumented
-run failed before any test executed:
+| Item | Value |
+|---|---|
+| Device | M2007J20CG, Android 12, `surya_global` |
+| adb | `device` |
+| `connectedDebugAndroidTest` | **2 tests passed, 0 failed** |
+| Run time | 1m 04s |
 
 ```
-INSTALL_FAILED_USER_RESTRICTED: Install canceled by user
-Failed to commit install session … package install-commit …
+com.rawpos.scanner.MainActivitySmokeTest: connectionScreenIsShownOnLaunch
+com.rawpos.scanner.core.camera.BarcodeDecodingTest: decodes_a_generated_ean13_image
 ```
 
-That is MIUI's per-app install restriction, not a test failure and not a code defect. Enabling
-**Developer options → Install via USB** (and, if it persists, **USB debugging (Security settings)**)
-is required before any instrumented test can run.
+The second test is the one that matters: it loads a **generated EAN-13 image** (`6291041500213`,
+checked in as a test asset), decodes it with the bundled ML Kit model on the device, asserts the value
+and that the symbology maps to `EAN_13`, then asserts `BarcodeValidator` accepts it. That is real
+decoding, not a mock.
+
+### Two MIUI behaviours worth recording
+
+1. **Installs fail while the screen is locked.** `INSTALL_FAILED_USER_RESTRICTED` appears even though
+   adb shows the device as authorised. Unlocking the screen is enough; no setting change was needed.
+2. **`pm grant` is blocked.** `adb shell pm grant … CAMERA` raises a security exception on this build,
+   so the runtime permission has to be granted by a person tapping *Allow*.
+
+The first cost three failed runs and is now written down so it does not cost them again.
 
 ### Not proven yet
 
-- Real barcode decoding on the device (needs the install to succeed and a physical label).
-- Camera preview rendering (same).
-- The instrumented camera smoke test — not written yet; it belongs with the first successful install.
+- **The live camera preview on this device.** Permission could not be granted programmatically, so the
+  preview, torch, and pause controls have not been exercised against a real camera yet.
+- **Decoding a physical label** — the image test proves ML Kit works; a real label also proves focus,
+  exposure, and aiming.
+- An instrumented camera smoke test that grants permission through the system dialog (UiAutomator).
 
 ---
 
 ## Open items
 
-1. **MIUI install restriction** — enable *Install via USB* so `connectedDebugAndroidTest` and manual
-   camera testing can run.
-2. **Real-label decoding** — unproven until the APK installs; needs physical labels, and the 20 sample
-   labels are synthetic, so the pre-pilot capture still stands as a blocking gate (R13).
-3. **Instrumented camera smoke test** — to be written with the first successful install.
+1. **Live camera preview on the device** — needs a person to grant the runtime permission once; `pm grant`
+   is blocked on this MIUI build.
+2. **Physical-label decoding** — the generated-image test proves ML Kit; a real label also proves aim,
+   focus, and exposure. The 20 sample labels are synthetic, so the pre-pilot capture still stands as a
+   blocking gate (R13).
+3. **Instrumented camera smoke test** — grant the permission through the system dialog with UiAutomator,
+   then assert the preview binds.
 4. **Arabic review** — 20 new scanner strings are written but not reviewed by a native speaker (Q22).
 5. **APK size** — 36.8 MB debug with the bundled model; measure release after R8 in Phase 8.
 6. **720p / ~10 fps tuning** — the analyzer currently uses CameraX defaults; measurements belong to
