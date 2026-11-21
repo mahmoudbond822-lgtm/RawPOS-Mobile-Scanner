@@ -70,7 +70,9 @@ def main(argv: list[str] | None = None) -> int:
     expected = build_manifest()
     if options.write:
         MANIFEST.write_text(
-            json.dumps(expected, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+            json.dumps(expected, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+            newline="\n",
         )
         print(f"manifest written: {len(expected['files'])} files (v1)")  # type: ignore[arg-type]
         return 0
