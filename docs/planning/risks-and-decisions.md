@@ -18,6 +18,10 @@ BLOCKED stops the dependent work.
 
 Every decision carries: rationale, alternatives, consequences, and the phase that depends on it.
 
+**Phase 4 route design:** the approved design for `POST /v1/scans` and `GET /v1/context`, including ten
+decisions (Q1–Q10) that resolve the gaps A12 leaves open, is recorded in
+`../architecture/desktop-scan-routes.md` (approved 2026-11-21).
+
 ---
 
 ## 2. Decision register
