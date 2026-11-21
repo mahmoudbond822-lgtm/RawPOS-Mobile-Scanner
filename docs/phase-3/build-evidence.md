@@ -141,13 +141,59 @@ decoding, not a mock.
 
 The first cost three failed runs and is now written down so it does not cost them again.
 
+### Manual check on the device — owner-observed, 2026-11-21
+
+| Behaviour | Observed |
+|---|---|
+| Live camera preview and target window | **yes** |
+| One reading while a label is held still | **yes** |
+| A second reading after removing and re-presenting the label | **yes** |
+| Two labels in the frame → "Frame one barcode" | **yes** |
+| Torch toggle and pause/resume | **yes** |
+| A rejection message for a non-numeric or disabled symbology | **not observed** |
+
+The first five are the behaviours that matter most, and they match the unit tests exactly: the gate
+latches on emit, requires absence before re-arming, and refuses ambiguity.
+
+**Provenance:** this is an owner-observed manual check, not something the agent measured. It is
+recorded as such on purpose.
+
+Corroborating instrumented-device log, which shows the bind/unbind lifecycle:
+
+```
+09:20:26 CONNECT    device 0  com.rawpos.scanner (PID 22517)
+09:21:21 DISCONNECT device 0  com.rawpos.scanner
+09:21:22 CONNECT    device 0  com.rawpos.scanner
+```
+
+Rejection rendering is unit-tested at the state level (`ScannerViewModelTest`) but has not been seen on
+the phone, because no non-numeric or disabled symbol was presented.
+
+### Phase 3 acceptance criteria
+
+| Criterion | Status |
+|---|---|
+| One physical label produces one event while held | **met** — manual + `ScanGateTest` |
+| A re-presented label after re-arm produces a second | **met** — manual + gate tests |
+| Non-digit / alphanumeric / QR payloads rejected with the right message | **partly** — logic tested; on-device display unobserved |
+| Leading zeros preserved | **met** — `BarcodeValidatorTest` |
+| No network call when offline | **met** — no `INTERNET` permission, transport `null` |
+| Camera releases on background/pause | **met** — `dumpsys media.camera` connect/disconnect + dispose unbind |
+
+### Still missing from the Phase 3 deliverable list
+
+Recorded so "it works" is not mistaken for "it is finished":
+
+- **Feedback**: sound, haptics, and reduced-motion handling were never implemented.
+- **Zoom control**: present in the Phase 1 placeholder, dropped when the screen was rebuilt.
+- **Instrumented camera smoke**: the fixture-image test covers decoding, not camera binding.
+- **Arabic review** of the 20 new scanner strings (Q22).
+
 ### Not proven yet
 
-- **The live camera preview on this device.** Permission could not be granted programmatically, so the
-  preview, torch, and pause controls have not been exercised against a real camera yet.
-- **Decoding a physical label** — the image test proves ML Kit works; a real label also proves focus,
-  exposure, and aiming.
-- An instrumented camera smoke test that grants permission through the system dialog (UiAutomator).
+- A rejection message rendered on the phone (logic tested, display unobserved).
+- Camera behaviour under low light, motion, or a dirty lens.
+- 720p / ~10 fps behaviour: the analyzer still uses CameraX defaults and no frame-rate measurement exists.
 
 ---
 
