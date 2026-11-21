@@ -6,21 +6,22 @@ This file is for any coding agent (OpenCode, Claude Code, Codex, or similar) tha
 ## 0. Current phase — read this first
 
 **Phase 1 (Android foundation) is implemented and verified.** The Android project lives under
-`android/`. There is still no camera, ML Kit, or barcode code in the app.
+`android/`.
 
-**Phase 2 (desktop receiver and secure pairing) is authorized as of 2026-11-20 and has not started.**
-Its scope is fixed by `docs/planning/approval-packet-phase-2.md`: `protocol.py`, `pairing.py`,
-`devices.py`, `tls.py`, `server.py`, `controller.py` (skeleton, no checkout), `mobile_scanner_dialog.py`,
-the `app.py`/`app_shell.py` wiring, and the exact `segno` pin — on a dedicated RawPOS branch, per A16.
+**Phase 2 (desktop receiver and secure pairing) is complete and merged** into RawPOS `main` at
+`7efa178` (2026-11-21). Evidence: `docs/phase-2/`.
 
-**Not authorized:** camera, ML Kit, barcode scanning, `POST /v1/scans`, `GET /v1/context`,
-`CheckoutService.resolve_barcode()`, any `CheckoutView` change, and any RawPOS push or merge. Do not
-start Phase 3 or Phase 5 work.
+**Phase 3 (Android camera and barcode scanning) is authorized as of 2026-11-21 and has not started.**
+Scope: CameraX preview and `ImageAnalysis`, bundled ML Kit, `ScanGate` duplicate suppression, the
+validation predicate, the scanner screen, feedback, and a `FakeTransport` for desktop-free testing.
+
+**Not authorized:** any network call or pairing client (Phase 4), `POST /v1/scans`, `GET /v1/context`,
+`CheckoutService.resolve_barcode()`, any `CheckoutView` change (Phase 5), and any change to the sibling
+RawPOS repository in this phase.
 
 **Do not:**
-- modify the sibling RawPOS repository (`..\RawPOS`) except on the Phase 2 branch authorized by A16;
-  never push, merge, or touch its `main`;
-- add Phase 3+ functionality to the project;
+- modify the sibling RawPOS repository (`..\RawPOS`); Phase 3 does not touch it at all;
+- add Phase 4+ functionality to the project;
 - commit, push, tag, fetch, or create/delete branches without explicit authorization;
 - claim a test, build, or manual QA passed unless you actually ran it and can quote the evidence;
 - add a dependency that is not required by the authorized phase.
@@ -56,10 +57,12 @@ Report the drift instead of silently following either.
 - No custom cryptography.
 - No cloud, telemetry, or internet dependency.
 
-## 3. Verified baseline (as of 2026-11-20)
+## 3. Verified baseline (as of 2026-11-21)
 
-- RawPOS HEAD: `797167acbcb14d96b476891a573a7e31638acf12`, branch `main`, clean tree.
-- Full suite measured: **1,450 passed in 134.97 s** using global `py -3` (Python 3.14.3).
+- RawPOS HEAD: `7efa178` (Phase 2 merge), branch `main`, clean tree.
+- Suite after the Phase 2 merge: **1,604 passed in 105.75 s** using global `py -3` (Python 3.14.3).
+- Pre-Phase-2 baseline: `797167ac…`, **1,450 passed in 134.97 s**. The 154 additional tests are the
+  Phase 2 receiver, pairing, TLS, controller, dialog, and wiring suites.
 - The RawPOS project `.venv` does **not** contain pytest; do not assume it can run tests.
 - RawPOS barcodes are ASCII digits only, non-empty, unique, with no length or check-digit rule.
 - `CheckoutService.resolve_scan()` performs name-search fallback when the barcode is unknown.

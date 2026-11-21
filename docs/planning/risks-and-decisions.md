@@ -458,6 +458,7 @@ authoritative; the packet only restates them.
 | A15 | Phase 1 authorization (Android foundation only) | — | **✅ RECORDED — 2026-11-20** (see note) |
 | A16 | RawPOS write authorization on a dedicated branch, including the narrow no-network test amendment | `AGENTS.md` §7 / A3 | **✅ APPROVED — 2026-11-20** (dedicated branch; branch push authorized 2026-11-21; **merge to `main` authorized and performed 2026-11-21**, merge commit `7efa178`) |
 | A17 | Dependency locking before Phase 2, or an explicit recorded deferral | `../phase-1/scope-compliance.md` §5.5 | **✅ APPROVED — 2026-11-20** (Gradle locking + exact `segno` pin) |
+| A18 | Phase 3 authorization: Android camera and barcode scanning, no network | — | **✅ APPROVED — 2026-11-21** |
 
 **A15 reconciliation (2026-11-20).** A15 had remained unchecked while Phase 1 was authorized and delivered.
 Its status is **recorded from the existing Phase 1 authorization** (“Android Foundation Only”) and the
@@ -475,7 +476,11 @@ Phase 1 was authorized on that basis, but A1 remains unchecked. It is left open 
 the owner should confirm the original approval date so the register and the roadmap agree.
 
 **Phase 2 itself is a separate line** (`approval-packet-phase-2.md` §9). Every Phase 2 prerequisite is
-approved, and the phase was **authorized 2026-11-20**.
+approved, and the phase was **authorized 2026-11-20** and merged 2026-11-21.
+
+**Remaining open items:** **A1** (reconciliation — needs the owner's Phase 0 approval date), **A10**
+(exact-only UPC/EAN — Phase 5, needs real 12/13-digit data), and **A12** (process-lifetime dedupe —
+Phase 4).
 
 ---
 

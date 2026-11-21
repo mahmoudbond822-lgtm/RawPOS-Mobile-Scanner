@@ -192,6 +192,8 @@ catalogs updated; evidence recorded.
 
 ## Phase 3 — Android camera and barcode scanning
 
+**Status:** **authorized 2026-11-21 (A18); not started.**
+
 **Duration:** 2 weeks (Android engineer).
 **Depends on:** Phase 1 (complete); **A11 — approved provisionally 2026-11-21** (D14 defaults, pre-pilot
 verification mandatory); a physical Android device (available). A10 is **not** a Phase 3 dependency: it
