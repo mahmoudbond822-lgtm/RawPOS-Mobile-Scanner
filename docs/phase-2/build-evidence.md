@@ -145,13 +145,90 @@ revisited when `server.py` lands.
 
 ---
 
+## Increment 3 — local TLS identity, and a guard conflict it exposed
+
+### What was added
+
+| File | Purpose |
+|---|---|
+| `src/rawpos/mobile/tls.py` | Self-signed ECDSA P-256 leaf, SPKI pin, reissue with the same key, DPAPI-protected key storage, TLS 1.2+ context |
+| `tests/unit/test_mobile_tls.py` | 17 tests, including a real loopback TLS handshake |
+| `tests/unit/test_packaging_secrets.py` | **Amended** — see below |
+
+### The guard conflict
+
+The first full run failed:
+
+```
+FAILED tests/unit/test_packaging_secrets.py::test_app_package_has_no_signing_code_or_secrets
+1 failed, 1547 passed
+```
+
+T072 (FR-011) scans every file under `src/rawpos/` and forbids `private_bytes` ("key serialization")
+and `generate_private_key` ("key generation"). Generating and serialising a per-install TLS key
+requires both, and `cryptography` offers no alternative API.
+
+The two obvious workarounds were rejected deliberately: obfuscating the call
+(`getattr(key, "private_" + "bytes")`) and moving the module outside the scanned tree would both
+defeat the guard **silently**, which is the exact failure it exists to prevent.
+
+**Resolution (owner-approved, 2026-11-21):** a narrow exemption in `_EXEMPT`, pinned to
+`src/rawpos/mobile/tls.py` and to those two labels only. Two new tests hold the pin:
+
+- `test_tls_exemption_is_pinned_to_one_file_and_two_labels` — fails if the map gains a file or a label.
+- `test_tls_exemption_cannot_hide_licence_signing` — asserts the exemption is disjoint from the
+  licence-signing labels (`derive_ddk`, `sign_payload`, `MASTER_KEY`, `Ed25519PrivateKey`, PEM
+  literals, secret file IO).
+
+The guard was then mutation-probed, not merely assumed. Appending `derive_ddk` to `devices.py`:
+
+```
+E       assert not {'src\\rawpos\\mobile\\devices.py': ['vendor DDK derivation']}
+1 failed, 4 passed
+```
+
+File restored afterwards. The exemption is narrow in practice, not only in intent.
+
+### Design decisions recorded
+
+- **TLS 1.2 minimum**, compression disabled, no client certificates (authorisation is the token).
+- **SANs** cover every selected LAN address plus `127.0.0.1` and `localhost`; `ensure_identity`
+  reissues when an address changes, which is what keeps the phone's stored endpoint usable.
+- **Pin = SHA-256 of the SPKI**, base64url, 43 characters — the value the QR will carry.
+- **Reissue keeps the private key**, so the pin survives an address change or expiry (D4).
+- **One-way fallback** (A6): `mode=acl` is written into the envelope and never migrated; a failed
+  DPAPI unprotect raises `KeyProtectionError` with no plaintext path.
+
+### Known limitation, stated plainly
+
+Python's TLS stack loads key material only from files, so `server_context` decrypts the key to a
+short-lived `0600` file inside the identity directory, loads it, and unlinks it in a `finally`.
+The plaintext window is the duration of `load_cert_chain`; `sweep_temp_files` clears anything a crash
+leaves behind. On Windows the `0600` mode is advisory and the protection is the directory ACL.
+
+### Gates after the change
+
+| Gate | Command | Result |
+|---|---|---|
+| Lint | `py -3 -m ruff check .` | `All checks passed!` |
+| Types | `py -3 -m mypy src` | `Success: no issues found in 154 source files` |
+| Money-path guard | `py -3 scripts/check_no_float.py` | `no-float gate: PASS` |
+| Full suite | `py -3 -m pytest -q` | **1550 passed in 93.44s** |
+
+1550 = 1450 existing + 57 + 24 + 17 + 2 new guard tests.
+
+---
+
 ## Open items in this phase
 
 1. **Socket-absence guard test** — to be added with `server.py` (increment 4).
-2. **Android SAS vector** — the derivation in increment 2 must be reproduced by the Android client and
-   checked against the pinned vector before Phase 4 contract tests.
-3. **Per-IP rate limiting** — absent until `server.py` (increment 4).
-4. **`waitress` decision** — pre-approved as the Phase 7 remedy if fuzzing fails; not adopted now.
-5. **DPAPI key protection** — `tls.py` (increment 3); the registry currently writes plain bytes
-   atomically and relies on that module for protection. Until then the registry file is **not**
-   protected at rest, which is acceptable only on this branch and must not ship.
+2. **Android SAS vector** — the derivation from increment 2 must be reproduced by the Android client
+   and checked against the pinned vector before Phase 4 contract tests.
+3. **Android pin verification** — the client must compute the same SPKI pin and fail closed on mismatch.
+4. **Per-IP rate limiting** — absent until `server.py` (increment 4).
+5. **`waitress` decision** — pre-approved as the Phase 7 remedy if fuzzing fails; not adopted now.
+6. **Temporary key file** — inherent to Python's TLS API; documented in `tls.py` and above.
+
+Registry protection is no longer an open item: `tls.py` provides the DPAPI path, and `devices.py` will
+be wired to it in increment 4. Until that wiring exists the registry file is still stored as plain
+bytes and **must not ship** in this state.
