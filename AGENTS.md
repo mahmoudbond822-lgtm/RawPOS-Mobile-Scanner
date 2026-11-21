@@ -11,16 +11,18 @@ This file is for any coding agent (OpenCode, Claude Code, Codex, or similar) tha
 **Phase 2 (desktop receiver and secure pairing) is complete and merged** into RawPOS `main` at
 `7efa178` (2026-11-21). Evidence: `docs/phase-2/`.
 
-**Phase 3 (Android camera and barcode scanning) is authorized as of 2026-11-21 and has not started.**
-Scope: CameraX preview and `ImageAnalysis`, bundled ML Kit, `ScanGate` duplicate suppression, the
-validation predicate, the scanner screen, feedback, and a `FakeTransport` for desktop-free testing.
+**Phase 3 (Android camera and barcode scanning) is complete** as of 2026-11-21. Evidence and closure:
+`docs/phase-3/`. The app scans real labels on the POCO X3, and three instrumented tests pass on it.
 
-**Not authorized:** any network call or pairing client (Phase 4), `POST /v1/scans`, `GET /v1/context`,
-`CheckoutService.resolve_barcode()`, any `CheckoutView` change (Phase 5), and any change to the sibling
-RawPOS repository in this phase.
+**Phase 4 (scan protocol and acknowledgment) is not authorized.** A12 (process-lifetime dedupe and
+uncertain delivery) is still unsigned.
+
+**Not authorized:** any network call or pairing client, `POST /v1/scans`, `GET /v1/context`,
+`CheckoutService.resolve_barcode()`, any `CheckoutView` change, and any change to the sibling RawPOS
+repository.
 
 **Do not:**
-- modify the sibling RawPOS repository (`..\RawPOS`); Phase 3 does not touch it at all;
+- modify the sibling RawPOS repository (`..\RawPOS`);
 - add Phase 4+ functionality to the project;
 - commit, push, tag, fetch, or create/delete branches without explicit authorization;
 - claim a test, build, or manual QA passed unless you actually ran it and can quote the evidence;

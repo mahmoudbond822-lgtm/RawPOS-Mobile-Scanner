@@ -192,7 +192,8 @@ catalogs updated; evidence recorded.
 
 ## Phase 3 — Android camera and barcode scanning
 
-**Status:** **authorized 2026-11-21 (A18); not started.**
+**Status:** **authorized 2026-11-21 (A18); complete 2026-11-21.** Evidence:
+`../phase-3/build-evidence.md`; closure: `../phase-3/scope-compliance.md`.
 
 **Duration:** 2 weeks (Android engineer).
 **Depends on:** Phase 1 (complete); **A11 — approved provisionally 2026-11-21** (D14 defaults, pre-pilot

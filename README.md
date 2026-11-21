@@ -2,7 +2,8 @@
 
 **Version:** 1.0 — architecture, specification, Phase 1 Android foundation, Phase 2 approved
 **Status:** Phase 1 implemented and verified. Phase 2 **complete and merged 2026-11-21**. Phase 3
-(Android camera and barcode scanning) **authorized 2026-11-21, not started**.
+(Android camera and barcode scanning) **complete 2026-11-21** — real hardware, three instrumented tests.
+Phase 4 has not started.
 **Companion to:** RawPOS Desktop (PyQt6 + SQLCipher, Windows)
 
 RawPOS Mobile Scanner turns an Android smartphone into a wireless barcode scanner for RawPOS Desktop.

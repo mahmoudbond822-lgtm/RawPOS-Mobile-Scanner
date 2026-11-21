@@ -219,19 +219,33 @@ the same product each produce feedback. Keying it on the value would have silent
 | `assembleDebug` | BUILD SUCCESSFUL |
 | `testDebugUnitTest` | **45 tests**, 0 failed |
 | `lintDebug` | 0 errors, 18 warnings — all version notices |
-| `connectedDebugAndroidTest` | **pending** — see below |
+| `connectedDebugAndroidTest` | blocked by MIUI's install gate |
+| Instrumented, installed by hand | **3 tests passed, 0 failed** |
 
-### A third MIUI behaviour
+```
+com.rawpos.scanner.MainActivitySmokeTest: .
+com.rawpos.scanner.core.camera.BarcodeDecodingTest: .
+com.rawpos.scanner.feature.scanner.ScannerScreenTest: .
 
-The instrumented run needs the screen unlocked, and this build blocks both `settings put system` and
-`pm grant`. The screen timeout is 30 s, so the phone re-locks during the one-minute build and the test
-APK install fails with `INSTALL_FAILED_USER_RESTRICTED`.
+OK (3 tests)
+Time: 5.75
+```
 
-Workable options, in order of preference:
+### How the instrumented suite was made to run
 
-1. Developer options → **Stay awake** (screen never sleeps while charging) — removes the problem entirely.
-2. Settings → Display → Screen timeout 10 minutes.
-3. Keep the phone unlocked by hand for the duration of the run.
+MIUI refused every USB install (`INSTALL_FAILED_USER_RESTRICTED`) even after USB debugging was
+re-enabled, because its separate **Install via USB** gate was off. That build also blocks `pm grant` and
+`settings put system`, so none of the usual workarounds were available.
+
+Resolution: both APKs were pushed to `/sdcard/Download` and installed from the device's file manager,
+which the USB-install gate does not cover. The suite was then run directly:
+
+```
+adb shell am instrument -w com.rawpos.scanner.test/androidx.test.runner.AndroidJUnitRunner
+```
+
+**This is a workaround, not a fix.** `connectedDebugAndroidTest` will keep failing on this phone until
+*Install via USB* is enabled, and Phase 4 will need many instrumented runs.
 
 ---
 
